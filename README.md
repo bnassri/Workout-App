@@ -7,17 +7,17 @@ Must Have
 
 Log a workout consisting of:
 
-Date
+    Date
 
-Exercise name
+    Exercise name
 
-Sets
+    Sets
 
-Repetitions
+    Repetitions
 
-Weight
+    Weight
 
-Optional notes
+    Optional notes
 
 View a list of previously logged workouts
 
@@ -29,25 +29,25 @@ Single-user system (no authentication)
 
 Should Have
 
-Ability to edit or delete a logged workout
+    Ability to edit or delete a logged workout
 
-Simple UI optimized for mobile use
+    Simple UI optimized for mobile use
 
-Persistent storage using a local database
+    Persistent storage using a local database
 
 Could Have
 
-Basic filtering by date or exercise
+    Basic filtering by date or exercise
 
-Simple statistics (e.g., max weight per exercise)
+    Simple statistics (e.g., max weight per exercise)
 
 Won’t Have (for MVP)
 
-Cloud sync
+    Cloud sync
 
-User accounts or authentication
+    User accounts or authentication
 
-Social or sharing features
+    Social or sharing features
 
 Implementation
 
@@ -55,23 +55,23 @@ Project Setup
 
 Technology Stack
 
-Java 17+
+    Java 17+
 
-Spring Boot (Web, Thymeleaf, Spring Data JPA)
+    Spring Boot (Web, Thymeleaf, Spring Data JPA)
 
-SQLite (local file-based DB)
+    SQLite (local file-based DB)
 
-Maven for build
+    Maven for build
 
 Initial Dependencies
 
-spring-boot-starter-web
+    spring-boot-starter-web
 
-spring-boot-starter-thymeleaf
+    spring-boot-starter-thymeleaf
 
-spring-boot-starter-data-jpa
+    spring-boot-starter-data-jpa
 
-sqlite-jdbc
+    sqlite-jdbc
 
 Project Structure
 
@@ -98,13 +98,13 @@ com.example.workoutlogger
 
 Entity Implementation Notes
 
-Use UUID as primary key
+    Use UUID as primary key
 
-IDs generated in application layer
+    IDs generated in application layer
 
-Map WorkoutSession → WorkoutSet as one-to-many
+    Map WorkoutSession → WorkoutSet as one-to-many
 
-Keep entities free of UI concerns
+    Keep entities free of UI concerns
 
 First Runnable Milestone (MVP Core)
 
@@ -112,58 +112,58 @@ Goal: Start a workout session and add a set via REST API
 
 Steps:
 
-Create Spring Boot application
+    Create Spring Boot application
 
-Configure SQLite datasource
+    Configure SQLite datasource
 
-Implement WorkoutSession and WorkoutSet entities
+    Implement WorkoutSession and WorkoutSet entities
 
-Implement repositories using Spring Data JPA
+    Implement repositories using Spring Data JPA
 
-Implement REST endpoints:
+    Implement REST endpoints:
 
-POST /api/workout-sessions/start
+        POST /api/workout-sessions/start
 
-POST /api/workout-sessions/{id}/sets
+        POST /api/workout-sessions/{id}/sets
 
-Verify data persistence via SQLite file
+    Verify data persistence via SQLite file
 
 At this milestone, the system is usable via HTTP clients (browser or curl).
 
 Second Milestone (User Interface)
 
-Add Thymeleaf page for:
+    Add Thymeleaf page for:
 
-Viewing past workout sessions
+        Viewing past workout sessions
 
 Add JavaScript-powered live session page:
 
-Start session
+    Start session
 
-Add sets
+    Add sets
 
-Rest timer
+    Rest timer
 
-Live volume calculation
+    Live volume calculation
 
 Milestones
 
-Foundation – Spring Boot app runs, SQLite configured
+    Foundation – Spring Boot app runs, SQLite configured
 
-Session API – Workout session lifecycle implemented
+    Session API – Workout session lifecycle implemented
 
-Persistence – Sets stored and retrievable
+    Persistence – Sets stored and retrievable
 
-Live Session UI – JavaScript-based workout logging
+    Live Session UI – JavaScript-based workout logging
 
-History View – Server-rendered workout browsing
+    History View – Server-rendered workout browsing
 
 Gathering Results
 
-Verify workouts persist across application restarts
+    Verify workouts persist across application restarts
 
-Measure UI responsiveness during live session logging
+    Measure UI responsiveness during live session logging
 
-Validate that requirements under "Must Have" are satisfied
+    Validate that requirements under "Must Have" are satisfied
 
-Confirm architecture supports future client-rendered frontend without refactoring
+    Confirm architecture supports future client-rendered frontend without refactoring
