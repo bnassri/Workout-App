@@ -76,25 +76,25 @@ Initial Dependencies
 Project Structure
 
 com.example.workoutlogger
-├── WorkoutLoggerApplication.java
-├── controller
-│   ├── WorkoutViewController.java
-│   └── WorkoutSessionApiController.java
-├── service
-│   └── WorkoutSessionService.java
-├── repository
-│   ├── WorkoutSessionRepository.java
-│   └── WorkoutSetRepository.java
-├── domain
-│   ├── WorkoutSession.java
-│   └── WorkoutSet.java
-├── dto
-│   ├── CreateWorkoutSessionResponse.java
-│   └── AddWorkoutSetRequest.java
-└── resources
-    ├── templates
-    │   └── workouts.html
-    └── application.yml
+    WorkoutLoggerApplication.java
+        controller
+            WorkoutViewController.java
+            WorkoutSessionApiController.java
+    service
+        WorkoutSessionService.java
+    repository
+        WorkoutSessionRepository.java
+        WorkoutSetRepository.java
+    domain
+        WorkoutSession.java
+        WorkoutSet.java
+    dto
+        CreateWorkoutSessionResponse.java
+        AddWorkoutSetRequest.java
+    resources
+        templates
+            workouts.html
+        application.yml
 
 Entity Implementation Notes
 
