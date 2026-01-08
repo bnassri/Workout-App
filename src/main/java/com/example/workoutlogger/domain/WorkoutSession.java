@@ -5,6 +5,9 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 
 
 @Entity
@@ -32,8 +35,13 @@ public class WorkoutSession {
     private List<WorkoutSet> sets = new ArrayList<>();
 
 
+    /**
+     * Store UUID as TEXT instead of BLOB.
+     * This makes IDs human-readable and API-friendly.
+     */
     @Id
-    @Column(nullable = false, updatable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, updatable = false, length = 36)
     private UUID id;
 
     @Column(nullable = false)
