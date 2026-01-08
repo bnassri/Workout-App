@@ -3,14 +3,19 @@ package com.example.workoutlogger.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 
 @Entity
 @Table(name = "workout_set")
 public class WorkoutSet {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, updatable = false, length = 36)
     private UUID id;
+
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "session_id")
