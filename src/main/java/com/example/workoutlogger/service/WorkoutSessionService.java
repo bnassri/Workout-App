@@ -50,4 +50,19 @@ public class WorkoutSessionService {
         return setRepository.save(set);
     }
 
+    /**
+     * Fetch a workout session by ID.
+     *
+     * This is used by:
+     * - Live workout page
+     * - Session summary view
+     *
+     * Throws if the session does not exist.
+     */
+    public WorkoutSession getSession(UUID sessionId) {
+        return repository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+    }
+
+
 }
