@@ -3,10 +3,34 @@ package com.example.workoutlogger.domain;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "workout_session")
 public class WorkoutSession {
+
+    /**
+     * One workout session can have many sets.
+     *
+     * mappedBy = "session" tells JPA:
+     * - The foreign key lives in WorkoutSet.session
+     * - WorkoutSession does NOT own the relationship
+     *
+     * cascade = ALL:
+     * - If we delete a session, its sets are deleted
+     *
+     * orphanRemoval = true:
+     * - Prevents "dangling" sets if removed from the session
+     */
+    @OneToMany(
+            mappedBy = "session",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<WorkoutSet> sets = new ArrayList<>();
+
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -50,5 +74,9 @@ public class WorkoutSession {
     public void end(Instant endTime) {
         this.endTime = endTime;
         this.status = "COMPLETED";
+    }
+
+    public List<WorkoutSet> getSets() {
+        return sets;
     }
 }
