@@ -1,5 +1,9 @@
 package com.example.workoutlogger.dto;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class ExerciseSummaryDto {
     /**
      * Aggregated stats for a single exercise
@@ -11,10 +15,7 @@ public class ExerciseSummaryDto {
     private final double volume;
 
 
-    public ExerciseSummaryDto(@JsonProperty("name") String name,
-                              @JsonProperty("sets") int sets,
-                              @JsonProperty("volume") double volume
-    ) {
+    public ExerciseSummaryDto(String name, int sets, double volume) {
         this.name = name;
         this.sets = sets;
         this.volume = volume;
