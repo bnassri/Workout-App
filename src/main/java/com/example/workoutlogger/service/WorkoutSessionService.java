@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import com.example.workoutlogger.repository.WorkoutSetRepository;
-
+import com.example.workoutlogger.dto.*;
+import com.example.workoutlogger.domain.WorkoutSet;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -62,6 +65,59 @@ public class WorkoutSessionService {
     public WorkoutSession getSession(UUID sessionId) {
         return repository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+    }
+
+    /**
+     * Builds a live summary of a workout session.
+     *
+     * This method:
+     * - Aggregates sets per exercise
+     * - Calculates volume (reps * weight)
+     * - Produces a UI-friendly DTO
+     */
+    public WorkoutSessionSummaryDto getSessionSummary(UUID sessionId) {
+
+        WorkoutSession session = repository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        List<WorkoutSet> sets = session.getSets();
+
+        // Group sets by exercise name
+        Map<String, List<WorkoutSet>> byExercise =
+                sets.stream().collect(Collectors.groupingBy(
+                        WorkoutSet::getExerciseName
+                ));
+
+        List<ExerciseSummaryDto> exerciseSummaries = new ArrayList<>();
+
+        double totalVolume = 0;
+
+        for (Map.Entry<String, List<WorkoutSet>> entry : byExercise.entrySet()) {
+            String exerciseName = entry.getKey();
+            List<WorkoutSet> exerciseSets = entry.getValue();
+
+            double exerciseVolume = exerciseSets.stream()
+                    .mapToDouble(s -> s.getReps() * s.getWeight())
+                    .sum();
+
+            totalVolume += exerciseVolume;
+
+            exerciseSummaries.add(
+                    new ExerciseSummaryDto(
+                            exerciseName,
+                            exerciseSets.size(),
+                            exerciseVolume
+                    )
+            );
+        }
+
+        return new WorkoutSessionSummaryDto(
+                session.getId(),
+                session.getStatus(),
+                sets.size(),
+                totalVolume,
+                exerciseSummaries
+        );
     }
 
 
