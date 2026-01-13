@@ -1,10 +1,12 @@
 package com.example.workoutlogger.dto;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.List;
 import java.util.UUID;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class WorkoutSessionSummaryDto {
     /**
      * Read-only summary of a workout session.
