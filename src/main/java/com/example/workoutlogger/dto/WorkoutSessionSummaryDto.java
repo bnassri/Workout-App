@@ -1,7 +1,9 @@
 package com.example.workoutlogger.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.UUID;
+
 public class WorkoutSessionSummaryDto {
     /**
      * Read-only summary of a workout session.
@@ -15,11 +17,11 @@ public class WorkoutSessionSummaryDto {
     private final List<ExerciseSummaryDto> exercises;
 
     public WorkoutSessionSummaryDto(
-            UUID sessionId,
-            String status,
-            int totalSets,
-            double totalVolume,
-            List<ExerciseSummaryDto> exercises
+            @JsonProperty("sessionId") UUID sessionId,
+            @JsonProperty("status") String status,
+            @JsonProperty("totalSets") int totalSets,
+            @JsonProperty("totalVolume") double totalVolume,
+            @JsonProperty("exercises") List<ExerciseSummaryDto> exercises
     ) {
         this.sessionId = sessionId;
         this.status = status;
