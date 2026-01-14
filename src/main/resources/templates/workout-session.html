@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live Workout</title>
+</head>
+<body>
+
+<h1>Live Workout Session</h1>
+
+<!-- Store session ID in the page -->
+<input type="hidden" id="sessionId" th:value="${sessionId}" />
+
+<h2>Add Set</h2>
+
+<label>
+    Exercise:
+    <input id="exerciseName" type="text" />
+</label>
+<br/>
+
+<label>
+    Reps:
+    <input id="reps" type="number" />
+</label>
+<br/>
+
+<label>
+    Weight:
+    <input id="weight" type="number" />
+</label>
+<br/>
+
+<button onclick="addSet()">Add Set</button>
+
+<hr/>
+
+<h2>Session Summary</h2>
+
+<div id="summary">
+    Loading...
+</div>
+
+<script>
+    const sessionId = document.getElementById("sessionId").value;
+
+    /**
+     * POST a new set to the backend
+     */
+    function addSet() {
+        const exerciseName = document.getElementById("exerciseName").value;
+        const reps = parseInt(document.getElementById("reps").value);
+        const weight = parseFloat(document.getElementById("weight").value);
+
+        fetch(`/api/workout-sessions/${sessionId}/sets`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                exerciseName,
+                reps,
+                weight
+            })
+        }).then(() => {
+            // Refresh summary immediately after adding a set
+            loadSummary();
+        });
+    }
+
+    /**
+     * Fetch live session summary
+     */
+    function loadSummary() {
+        fetch(`/api/workout-sessions/${sessionId}/summary`)
+            .then(response => response.json())
+            .then(data => {
+                renderSummary(data);
+            });
+    }
+
+    /**
+     * Render summary data into HTML
+     */
+    function renderSummary(summary) {
+        let html = `
+            <p>Status: ${summary.status}</p>
+            <p>Total Sets: ${summary.totalSets}</p>
+            <p>Total Volume: ${summary.totalVolume}</p>
+            <ul>
+        `;
+
+        for (const ex of summary.exercises) {
+            html += `<li>${ex.name}: ${ex.sets} sets, volume ${ex.volume}</li>`;
+        }
+
+        html += "</ul>";
+
+        document.getElementById("summary").innerHTML = html;
+    }
+
+    // Poll every 3 seconds
+    setInterval(loadSummary, 3000);
+
+    // Initial load
+    loadSummary();
+</script>
+
+</body>
+</html>
