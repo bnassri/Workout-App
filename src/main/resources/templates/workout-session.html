@@ -10,6 +10,18 @@
 
 <!-- Store session ID in the page -->
 <input type="hidden" id="sessionId" th:value="${sessionId}" />
+<h2>Workout Timers</h2>
+
+<div>
+    <strong>Total Workout Time:</strong>
+    <span id="workoutTimer">00:00:00</span>
+</div>
+
+<div>
+    <strong>Rest Timer:</strong>
+    <span id="restTimer">00:00</span>
+</div>
+
 
 <h2>Add Set</h2>
 
@@ -41,7 +53,7 @@
     Loading...
 </div>
 
-<script>
+<script th:inline="javascript">
     const sessionId = document.getElementById("sessionId").value;
 
     /**
@@ -63,7 +75,8 @@
                 weight
             })
         }).then(() => {
-            // Refresh summary immediately after adding a set
+            // Refresh summary and timer immediately after adding a set
+            startRestTimer();
             loadSummary();
         });
     }
@@ -104,6 +117,69 @@
 
     // Initial load
     loadSummary();
+
+
+    // --- TOTAL WORKOUT TIMER ---
+
+    // Session start time injected by Thymeleaf
+const workoutStartTime = new Date('[[${session.startTime}]]');
+
+    function pad(number) {
+        return number.toString().padStart(2, "0");
+    }
+
+    function updateWorkoutTimer() {
+        const now = new Date();
+        const elapsedMs = now - workoutStartTime;
+
+        const totalSeconds = Math.floor(elapsedMs / 1000);
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const timerEl = document.getElementById("workoutTimer");
+        if (!timerEl) return; // DOM not ready yet
+
+        timerEl.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        updateWorkoutTimer();
+        setInterval(updateWorkoutTimer, 1000);
+    });
+
+   // --- REST TIMER ---
+
+    let restSeconds = 0;
+    let restInterval = null;
+
+    function startRestTimer() {
+        stopRestTimer();
+        restSeconds = 0;
+
+        restInterval = setInterval(() => {
+            restSeconds++;
+            updateRestTimerDisplay();
+        }, 1000);
+    }
+
+    function stopRestTimer() {
+        if (restInterval) {
+            clearInterval(restInterval);
+            restInterval = null;
+        }
+    }
+
+    function updateRestTimerDisplay() {
+        const minutes = Math.floor(restSeconds / 60);
+        const seconds = restSeconds % 60;
+
+        document.getElementById("restTimer").innerText =
+            `${pad(minutes)}:${pad(seconds)}`;
+    }
+
+
 </script>
 
 </body>
