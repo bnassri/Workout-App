@@ -54,11 +54,80 @@
 </div>
 
 <script th:inline="javascript">
-    const sessionId = document.getElementById("sessionId").value;
 
-    /**
-     * POST a new set to the backend
-     */
+    /* ===============================
+       Server-injected values
+       =============================== */
+
+    const workoutStartTime = new Date('[[${session.startTime}]]');
+
+    /* ===============================
+       Utility
+       =============================== */
+
+    function pad(number) {
+        return number.toString().padStart(2, "0");
+    }
+
+    /* ===============================
+       TOTAL WORKOUT TIMER
+       =============================== */
+
+    function updateWorkoutTimer() {
+        const now = new Date();
+        const elapsedMs = now - workoutStartTime;
+
+        if (isNaN(elapsedMs)) {
+            console.error("Elapsed time is NaN", {
+                now,
+                workoutStartTime
+            });
+            return;
+        }
+
+        const totalSeconds = Math.floor(elapsedMs / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        document.getElementById("workoutTimer").innerText =
+            `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    /* ===============================
+       REST TIMER
+       =============================== */
+
+    let restSeconds = 0;
+    let restInterval = null;
+
+    function startRestTimer() {
+        stopRestTimer();
+        restSeconds = 0;
+
+        restInterval = setInterval(() => {
+            restSeconds++;
+            const minutes = Math.floor(restSeconds / 60);
+            const seconds = restSeconds % 60;
+
+            document.getElementById("restTimer").innerText =
+                `${pad(minutes)}:${pad(seconds)}`;
+        }, 1000);
+    }
+
+    function stopRestTimer() {
+        if (restInterval) {
+            clearInterval(restInterval);
+            restInterval = null;
+        }
+    }
+
+    /* ===============================
+       API CALLS
+       =============================== */
+
+    let sessionId;
+
     function addSet() {
         const exerciseName = document.getElementById("exerciseName").value;
         const reps = parseInt(document.getElementById("reps").value);
@@ -66,35 +135,20 @@
 
         fetch(`/api/workout-sessions/${sessionId}/sets`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                exerciseName,
-                reps,
-                weight
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ exerciseName, reps, weight })
         }).then(() => {
-            // Refresh summary and timer immediately after adding a set
             startRestTimer();
             loadSummary();
         });
     }
 
-    /**
-     * Fetch live session summary
-     */
     function loadSummary() {
         fetch(`/api/workout-sessions/${sessionId}/summary`)
-            .then(response => response.json())
-            .then(data => {
-                renderSummary(data);
-            });
+            .then(r => r.json())
+            .then(renderSummary);
     }
 
-    /**
-     * Render summary data into HTML
-     */
     function renderSummary(summary) {
         let html = `
             <p>Status: ${summary.status}</p>
@@ -108,79 +162,27 @@
         }
 
         html += "</ul>";
-
         document.getElementById("summary").innerHTML = html;
     }
 
-    // Poll every 3 seconds
-    setInterval(loadSummary, 3000);
-
-    // Initial load
-    loadSummary();
-
-
-    // --- TOTAL WORKOUT TIMER ---
-
-    // Session start time injected by Thymeleaf
-const workoutStartTime = new Date('[[${session.startTime}]]');
-
-    function pad(number) {
-        return number.toString().padStart(2, "0");
-    }
-
-    function updateWorkoutTimer() {
-        const now = new Date();
-        const elapsedMs = now - workoutStartTime;
-
-        const totalSeconds = Math.floor(elapsedMs / 1000);
-
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        const timerEl = document.getElementById("workoutTimer");
-        if (!timerEl) return; // DOM not ready yet
-
-        timerEl.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-    }
+    /* ===============================
+       INIT (DOM READY)
+       =============================== */
 
     document.addEventListener("DOMContentLoaded", () => {
+        sessionId = document.getElementById("sessionId").value;
+
+        // Timers
         updateWorkoutTimer();
         setInterval(updateWorkoutTimer, 1000);
+
+        // Summary polling
+        loadSummary();
+        setInterval(loadSummary, 3000);
     });
 
-   // --- REST TIMER ---
-
-    let restSeconds = 0;
-    let restInterval = null;
-
-    function startRestTimer() {
-        stopRestTimer();
-        restSeconds = 0;
-
-        restInterval = setInterval(() => {
-            restSeconds++;
-            updateRestTimerDisplay();
-        }, 1000);
-    }
-
-    function stopRestTimer() {
-        if (restInterval) {
-            clearInterval(restInterval);
-            restInterval = null;
-        }
-    }
-
-    function updateRestTimerDisplay() {
-        const minutes = Math.floor(restSeconds / 60);
-        const seconds = restSeconds % 60;
-
-        document.getElementById("restTimer").innerText =
-            `${pad(minutes)}:${pad(seconds)}`;
-    }
-
-
 </script>
+
 
 </body>
 </html>
