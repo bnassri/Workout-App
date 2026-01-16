@@ -29,6 +29,10 @@ public class WorkoutSessionPageController {
             Model model) {
         WorkoutSession session = service.getSession(sessionId);
 
+
+        // REQUIRED for timers + UI
+        model.addAttribute("session", session);
+
         // Expose session ID to the HTML page
         model.addAttribute("sessionId", session.getId());
 
