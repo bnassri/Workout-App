@@ -40,7 +40,13 @@ public class WorkoutSessionPageController {
 
         model.addAttribute("session", session);
         model.addAttribute("sessionId", session.getId());
+        model.addAttribute(
+                "startTimeMillis",
+                session.getStartTime().toEpochMilli()
+
+        );
 
         return "workout-session";
     }
+
 }

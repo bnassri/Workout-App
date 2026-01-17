@@ -2,14 +2,14 @@
 <<html xmlns:th="http://www.thymeleaf.org">>
 <head>
     <meta charset="UTF-8">
-    <title>Live Workout</title>
+    <title>Workout Logger</title>
 </head>
 <body>
 
-<h1>Live Workout Session</h1>
+<h1>Workout Logger</h1>
 
 <!-- Store session ID in the page -->
-<input type="hidden" id="sessionId" th:value="${sessionId}" />
+<input type="hidden" id="sessionId" th:value="${sessionId}" >
 <h2>Workout Timers</h2>
 
 <div>
@@ -54,131 +54,106 @@
 </div>
 
 <script th:inline="javascript">
+/* ===============================
+   Server-injected values
+   =============================== */
 
-    /* ===============================
-       Server-injected values
-       =============================== */
+const sessionId = document.getElementById("sessionId").value;
+const workoutStartTime = new Date([[${startTimeMillis}]]);
 
-    const workoutStartTime = new Date('[[${session.startTime}]]');
-            if (isNaN(workoutStartTime.getTime())) {
-            console.error("Invalid workoutStartTime:", '[[${session.startTime}]]');
-        }
-
-        function pad(n) {
-            return n.toString().padStart(2, "0");
-        }
-
-        function updateWorkoutTimer() {
-            const elapsedMs = new Date() - workoutStartTime;
-            const totalSeconds = Math.floor(elapsedMs / 1000);
-
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            document.getElementById("workoutTimer").innerText =
-                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-        }
-
-        setInterval(updateWorkoutTimer, 1000);
-
-    if (isNaN(workoutStartTime.getTime())) {
+if (isNaN(workoutStartTime.getTime())) {
     console.error(
         "Invalid workoutStartTime injected from server:",
         '[[${session.startTime}]]'
     );
 }
 
+/* ===============================
+   Utility
+   =============================== */
 
-    /* ===============================
-       Utility
-       =============================== */
+function pad(n) {
+    return n.toString().padStart(2, "0");
+}
 
-    function pad(number) {
-        return number.toString().padStart(2, "0");
+/* ===============================
+   TOTAL WORKOUT TIMER
+   =============================== */
+
+function updateWorkoutTimer() {
+    const now = new Date();
+    const elapsedMs = now - workoutStartTime;
+
+    if (isNaN(elapsedMs)) {
+        console.error("Elapsed time is NaN", { now, workoutStartTime });
+        return;
     }
 
-    /* ===============================
-       TOTAL WORKOUT TIMER
-       =============================== */
+    const totalSeconds = Math.floor(elapsedMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-    function updateWorkoutTimer() {
-        const now = new Date();
-        const elapsedMs = now - workoutStartTime;
+    document.getElementById("workoutTimer").innerText =
+        `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
 
-        if (isNaN(elapsedMs)) {
-            console.error("Elapsed time is NaN", {
-                now,
-                workoutStartTime
-            });
-            return;
-        }
+/* ===============================
+   REST TIMER
+   =============================== */
 
-        const totalSeconds = Math.floor(elapsedMs / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+let restSeconds = 0;
+let restInterval = null;
 
-        document.getElementById("workoutTimer").innerText =
-            `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+function startRestTimer() {
+    stopRestTimer();
+    restSeconds = 0;
+
+    restInterval = setInterval(() => {
+        restSeconds++;
+        const minutes = Math.floor(restSeconds / 60);
+        const seconds = restSeconds % 60;
+
+        document.getElementById("restTimer").innerText =
+            `${pad(minutes)}:${pad(seconds)}`;
+    }, 1000);
+}
+
+function stopRestTimer() {
+    if (restInterval) {
+        clearInterval(restInterval);
+        restInterval = null;
     }
+}
 
-    /* ===============================
-       REST TIMER
-       =============================== */
+/* ===============================
+   API CALLS
+   =============================== */
 
-    let restSeconds = 0;
-    let restInterval = null;
+let summaryPoller = null;
 
-    function startRestTimer() {
-        stopRestTimer();
-        restSeconds = 0;
+function addSet() {
+    const exerciseName = document.getElementById("exerciseName").value;
+    const reps = parseInt(document.getElementById("reps").value, 10);
+    const weight = parseFloat(document.getElementById("weight").value);
 
-        restInterval = setInterval(() => {
-            restSeconds++;
-            const minutes = Math.floor(restSeconds / 60);
-            const seconds = restSeconds % 60;
+    fetch(`/api/workout-sessions/${sessionId}/sets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exerciseName, reps, weight })
+    }).then(() => {
+        startRestTimer();
+        loadSummary();
+    });
+}
 
-            document.getElementById("restTimer").innerText =
-                `${pad(minutes)}:${pad(seconds)}`;
-        }, 1000);
-    }
-
-    function stopRestTimer() {
-        if (restInterval) {
-            clearInterval(restInterval);
-            restInterval = null;
-        }
-    }
-
-    /* ===============================
-       API CALLS
-       =============================== */
-
-    let sessionId;
-
-    function addSet() {
-        const exerciseName = document.getElementById("exerciseName").value;
-        const reps = parseInt(document.getElementById("reps").value);
-        const weight = parseFloat(document.getElementById("weight").value);
-
-        fetch(`/api/workout-sessions/${sessionId}/sets`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ exerciseName, reps, weight })
-        }).then(() => {
-            startRestTimer();
-            loadSummary();
-        });
-    }
-
-    function loadSummary() {
-        fetch(`/api/workout-sessions/${sessionId}/summary`)
+function loadSummary() {
+    fetch(`/api/workout-sessions/${sessionId}/summary`)
         .then(response => {
             if (response.status === 404) {
                 alert("This workout session no longer exists. Please start a new workout.");
                 clearInterval(summaryPoller);
-                return;
+                return null;
             }
             return response.json();
         })
@@ -187,41 +162,40 @@
                 renderSummary(data);
             }
         });
+}
+
+function renderSummary(summary) {
+    let html = `
+        <p>Status: ${summary.status}</p>
+        <p>Total Sets: ${summary.totalSets}</p>
+        <p>Total Volume: ${summary.totalVolume}</p>
+        <ul>
+    `;
+
+    for (const ex of summary.exercises) {
+        html += `<li>${ex.name}: ${ex.sets} sets, volume ${ex.volume}</li>`;
     }
 
-    function renderSummary(summary) {
-        let html = `
-            <p>Status: ${summary.status}</p>
-            <p>Total Sets: ${summary.totalSets}</p>
-            <p>Total Volume: ${summary.totalVolume}</p>
-            <ul>
-        `;
+    html += "</ul>";
+    document.getElementById("summary").innerHTML = html;
+}
 
-        for (const ex of summary.exercises) {
-            html += `<li>${ex.name}: ${ex.sets} sets, volume ${ex.volume}</li>`;
-        }
+/* ===============================
+   START EVERYTHING
+   =============================== */
 
-        html += "</ul>";
-        document.getElementById("summary").innerHTML = html;
-    }
+// Workout timer
+updateWorkoutTimer();
+setInterval(updateWorkoutTimer, 1000);
 
-    /* ===============================
-       INIT (DOM READY)
-       =============================== */
-
-    document.addEventListener("DOMContentLoaded", () => {
-        sessionId = document.getElementById("sessionId").value;
-
-        // Timers
-        updateWorkoutTimer();
-        setInterval(updateWorkoutTimer, 1000);
-
-        // Summary polling
-        loadSummary();
-        setInterval(loadSummary, 3000);
-    });
+// Summary polling
+loadSummary();
+summaryPoller = setInterval(loadSummary, 3000);
 
 </script>
+
+
+
 
 
 </body>
