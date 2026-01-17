@@ -6,12 +6,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
 import java.util.UUID;
+
 @Controller
 public class WorkoutSessionPageController {
-    /**
-     * Server-rendered pages for workout sessions.  Will return HTML, not JSON
-     **/
+
     private final WorkoutSessionService service;
 
     public WorkoutSessionPageController(WorkoutSessionService service) {
@@ -19,21 +20,25 @@ public class WorkoutSessionPageController {
     }
 
     /**
-     * Live workout page
-     * URL: /workout-sessions/{id}
+     * Handles the Start Workout button from home.html
      */
+    @PostMapping("/workout-sessions/start")
+    public String startWorkout() {
+        WorkoutSession session = service.startSession();
+        return "redirect:/workout-sessions/" + session.getId();
+    }
 
-    @GetMapping("/workout-sessions/{sessionId}")
+    /**
+     * Renders the workout session page
+     */
+    @GetMapping("/workout-sessions/{id}")
     public String workoutSessionPage(
-            @PathVariable UUID sessionId,
-            Model model) {
-        WorkoutSession session = service.getSession(sessionId);
+            @PathVariable UUID id,
+            Model model
+    ) {
+        WorkoutSession session = service.getSession(id);
 
-
-        // REQUIRED for timers + UI
         model.addAttribute("session", session);
-
-        // Expose session ID to the HTML page
         model.addAttribute("sessionId", session.getId());
 
         return "workout-session";

@@ -10,7 +10,7 @@ import com.example.workoutlogger.repository.WorkoutSetRepository;
 import com.example.workoutlogger.dto.*;
 import com.example.workoutlogger.domain.WorkoutSet;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.http.HttpStatus;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.time.Instant;

@@ -28,10 +28,12 @@ public class WorkoutSessionApiController {
         this.service = service;
     }
 
-    @PostMapping("/start")
-    public WorkoutSession startSession() {
-        return service.startSession();
+    @PostMapping("/workout-sessions/start")
+    public String startSession() {
+        WorkoutSession session = service.startSession();
+        return "redirect:/workout-sessions/" + session.getId();
     }
+
 
     /**
      * Fetch a workout session along with its sets.
@@ -52,6 +54,7 @@ public class WorkoutSessionApiController {
      * - Client-rendered UIs
      * - Future WebSocket updates
      */
+
     @GetMapping("/{sessionId}/summary")
     public WorkoutSessionSummaryDto getSummary(
             @PathVariable UUID sessionId
