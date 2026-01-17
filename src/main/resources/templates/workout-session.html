@@ -60,6 +60,35 @@
        =============================== */
 
     const workoutStartTime = new Date('[[${session.startTime}]]');
+            if (isNaN(workoutStartTime.getTime())) {
+            console.error("Invalid workoutStartTime:", '[[${session.startTime}]]');
+        }
+
+        function pad(n) {
+            return n.toString().padStart(2, "0");
+        }
+
+        function updateWorkoutTimer() {
+            const elapsedMs = new Date() - workoutStartTime;
+            const totalSeconds = Math.floor(elapsedMs / 1000);
+
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            document.getElementById("workoutTimer").innerText =
+                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        setInterval(updateWorkoutTimer, 1000);
+
+    if (isNaN(workoutStartTime.getTime())) {
+    console.error(
+        "Invalid workoutStartTime injected from server:",
+        '[[${session.startTime}]]'
+    );
+}
+
 
     /* ===============================
        Utility
@@ -145,8 +174,19 @@
 
     function loadSummary() {
         fetch(`/api/workout-sessions/${sessionId}/summary`)
-            .then(r => r.json())
-            .then(renderSummary);
+        .then(response => {
+            if (response.status === 404) {
+                alert("This workout session no longer exists. Please start a new workout.");
+                clearInterval(summaryPoller);
+                return;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                renderSummary(data);
+            }
+        });
     }
 
     function renderSummary(summary) {
