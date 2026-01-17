@@ -2,12 +2,15 @@ package com.example.workoutlogger.service;
 
 import com.example.workoutlogger.domain.WorkoutSession;
 import com.example.workoutlogger.repository.WorkoutSessionRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import com.example.workoutlogger.repository.WorkoutSetRepository;
 import com.example.workoutlogger.dto.*;
 import com.example.workoutlogger.domain.WorkoutSet;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.time.Instant;
@@ -76,9 +79,12 @@ public class WorkoutSessionService {
      * - Produces a UI-friendly DTO
      */
     public WorkoutSessionSummaryDto getSessionSummary(UUID sessionId) {
-
+        System.out.println("DEBUG summary requested for sessionId = " + sessionId);
         WorkoutSession session = repository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+                .orElseThrow(() ->     new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Workout session not found"
+                ));
 
         List<WorkoutSet> sets = session.getSets();
 
