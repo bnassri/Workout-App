@@ -211,8 +211,16 @@ function endWorkout() {
             clearInterval(restInterval);
         }
 
-        // Redirect to home or summary
-        window.location.href = "/";
+    // Redirect to home or summary
+function endWorkout() {
+    fetch(`/api/workout-sessions/${sessionId}/end`, {
+        method: "PUT"
+    }).then(() => {
+        window.location.href = `/workout-sessions/${sessionId}/summary`;
+    });
+}
+
+
     });
 }
 

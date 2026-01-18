@@ -12,6 +12,8 @@ import com.example.workoutlogger.domain.WorkoutSet;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.time.Instant;
@@ -138,6 +140,49 @@ public class WorkoutSessionService {
 
 
     }
+
+    public WorkoutSummaryView getWorkoutSummaryView(UUID sessionId) {
+        WorkoutSession session = repository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        if (session.getEndTime() == null) {
+            throw new IllegalStateException("Workout has not ended yet");
+        }
+
+        long durationSeconds = Duration
+                .between(session.getStartTime(), session.getEndTime())
+                .getSeconds();
+
+        int totalSets = session.getSets().size();
+
+        double totalVolume = session.getSets().stream()
+                .mapToDouble(s -> s.getReps() * s.getWeight())
+                .sum();
+
+        Map<String, List<WorkoutSet>> byExercise =
+                session.getSets().stream()
+                        .collect(Collectors.groupingBy(WorkoutSet::getExerciseName));
+
+        List<ExerciseSummaryDto> exercises = byExercise.entrySet().stream()
+                .map(e -> {
+                    int sets = e.getValue().size();
+                    double volume = e.getValue().stream()
+                            .mapToDouble(s -> s.getReps() * s.getWeight())
+                            .sum();
+                    return new ExerciseSummaryDto(e.getKey(), sets, volume);
+                })
+                .toList();
+
+        return new WorkoutSummaryView(
+                session.getStartTime(),
+                session.getEndTime(),
+                durationSeconds,
+                totalSets,
+                totalVolume,
+                exercises
+        );
+    }
+
 
 
 }
