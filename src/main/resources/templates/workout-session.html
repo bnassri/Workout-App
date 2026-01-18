@@ -62,10 +62,7 @@ const sessionId = document.getElementById("sessionId").value;
 const workoutStartTime = new Date([[${startTimeMillis}]]);
 
 if (isNaN(workoutStartTime.getTime())) {
-    console.error(
-        "Invalid workoutStartTime injected from server:",
-        '[[${session.startTime}]]'
-    );
+    console.error("Invalid workoutStartTime injected from server");
 }
 
 /* ===============================
@@ -81,13 +78,9 @@ function pad(n) {
    =============================== */
 
 function updateWorkoutTimer() {
-    const now = new Date();
-    const elapsedMs = now - workoutStartTime;
+    const elapsedMs = new Date() - workoutStartTime;
 
-    if (isNaN(elapsedMs)) {
-        console.error("Elapsed time is NaN", { now, workoutStartTime });
-        return;
-    }
+    if (isNaN(elapsedMs)) return;
 
     const totalSeconds = Math.floor(elapsedMs / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -151,16 +144,14 @@ function loadSummary() {
     fetch(`/api/workout-sessions/${sessionId}/summary`)
         .then(response => {
             if (response.status === 404) {
-                alert("This workout session no longer exists. Please start a new workout.");
+                alert("This workout session no longer exists.");
                 clearInterval(summaryPoller);
                 return null;
             }
             return response.json();
         })
         .then(data => {
-            if (data) {
-                renderSummary(data);
-            }
+            if (data) renderSummary(data);
         });
 }
 
@@ -181,55 +172,50 @@ function renderSummary(summary) {
 }
 
 /* ===============================
-   START EVERYTHING
+   END WORKOUT
    =============================== */
-
-// Workout timer
-updateWorkoutTimer();
-const workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
-
-// Summary polling
-loadSummary();
-summaryPoller = setInterval(loadSummary, 3000);
 
 function endWorkout() {
-    if (!confirm("End this workout?")) {
-        return;
-    }
-
-    /* ===============================
-   End Workout
-   =============================== */
+    if (!confirm("End this workout?")) return;
 
     fetch(`/api/workout-sessions/${sessionId}/end`, {
         method: "PUT"
     })
-    .then(() => {
-        // Stop timers
-        clearInterval(workoutTimerInterval);
-        if (restInterval) {
-            clearInterval(restInterval);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to end workout");
         }
 
-    // Redirect to home or summary
-function endWorkout() {
-    fetch(`/api/workout-sessions/${sessionId}/end`, {
-        method: "PUT"
-    }).then(() => {
+        clearInterval(workoutTimerInterval);
+        if (restInterval) clearInterval(restInterval);
+
         window.location.href = `/workout-sessions/${sessionId}/summary`;
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Could not end workout.");
     });
 }
 
+/* ===============================
+   START EVERYTHING
+   =============================== */
 
-    });
-}
+updateWorkoutTimer();
+const workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
+
+loadSummary();
+summaryPoller = setInterval(loadSummary, 3000);
 
 </script>
 
 
-<button id="endWorkoutBtn" onclick="endWorkout()">
-    End Workout
-</button>
+
+
+
+
+
+<button onclick="endWorkout()">End Workout</button>
 
 
 </body>

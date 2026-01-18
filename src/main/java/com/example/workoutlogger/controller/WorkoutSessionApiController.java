@@ -77,7 +77,8 @@ public class WorkoutSessionApiController {
         return service.addSet(sessionId, request);
     }
 
-    @PutMapping("/api/workout-sessions/{id}/end")
+    @PutMapping("/{id}/end")
+
     public ResponseEntity<Void> endWorkout(@PathVariable UUID id) {
         service.endSession(id);
         return ResponseEntity.ok().build();
