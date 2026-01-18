@@ -9,6 +9,7 @@ import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import com.example.workoutlogger.repository.WorkoutSetRepository;
 import com.example.workoutlogger.dto.*;
 import com.example.workoutlogger.domain.WorkoutSet;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import java.util.*;
@@ -69,6 +70,16 @@ public class WorkoutSessionService {
         return repository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
     }
+    @Transactional
+    public WorkoutSession endSession(UUID sessionId) {
+        WorkoutSession session = repository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        session.end(Instant.now());
+
+        return repository.save(session);
+    }
+
 
     /**
      * Builds a live summary of a workout session.
@@ -124,6 +135,8 @@ public class WorkoutSessionService {
                 totalVolume,
                 exerciseSummaries
         );
+
+
     }
 
 

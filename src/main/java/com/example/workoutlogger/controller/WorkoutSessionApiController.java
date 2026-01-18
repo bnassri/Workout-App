@@ -4,15 +4,11 @@ package com.example.workoutlogger.controller;
 import com.example.workoutlogger.domain.WorkoutSession;
 import com.example.workoutlogger.dto.WorkoutSessionSummaryDto;
 import com.example.workoutlogger.service.WorkoutSessionService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.util.UUID;
@@ -80,5 +76,12 @@ public class WorkoutSessionApiController {
     ) {
         return service.addSet(sessionId, request);
     }
+
+    @PutMapping("/api/workout-sessions/{id}/end")
+    public ResponseEntity<Void> endWorkout(@PathVariable UUID id) {
+        service.endSession(id);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

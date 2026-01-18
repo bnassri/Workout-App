@@ -186,16 +186,42 @@ function renderSummary(summary) {
 
 // Workout timer
 updateWorkoutTimer();
-setInterval(updateWorkoutTimer, 1000);
+const workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
 
 // Summary polling
 loadSummary();
 summaryPoller = setInterval(loadSummary, 3000);
 
+function endWorkout() {
+    if (!confirm("End this workout?")) {
+        return;
+    }
+
+    /* ===============================
+   End Workout
+   =============================== */
+
+    fetch(`/api/workout-sessions/${sessionId}/end`, {
+        method: "PUT"
+    })
+    .then(() => {
+        // Stop timers
+        clearInterval(workoutTimerInterval);
+        if (restInterval) {
+            clearInterval(restInterval);
+        }
+
+        // Redirect to home or summary
+        window.location.href = "/";
+    });
+}
+
 </script>
 
 
-
+<button id="endWorkoutBtn" onclick="endWorkout()">
+    End Workout
+</button>
 
 
 </body>
