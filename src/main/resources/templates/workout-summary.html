@@ -1,44 +1,74 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Workout Summary</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .summary { margin-bottom: 2rem; }
+        .exercises { margin-top: 1rem; }
+        .exercise { margin-bottom: 0.5rem; }
+        a { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; display: inline-block; }
+    </style>
 </head>
 <body>
 
 <h1>Workout Summary</h1>
 
-<p>
-    <strong>Start:</strong>
-    <span th:text="${summary.startTime}"></span>
-</p>
+<div class="summary">
+    <p><strong>Start:</strong>
+        <span th:text="${summary.startTime != null ?
+            #temporals.format(summary.startTime, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">
+        </span>
+    </p>
 
-<p>
-    <strong>End:</strong>
-    <span th:text="${summary.endTime}"></span>
-</p>
+    <p><strong>End:</strong>
+        <span th:text="${summary.endTime != null ?
+            #temporals.format(summary.endTime, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">
+        </span>
+    </p>
 
-<p>
-    <strong>Total Duration:</strong>
-    <span th:text="
-        ${#numbers.formatInteger(summary.durationSeconds / 3600, 2)} + ':' +
-        ${#numbers.formatInteger((summary.durationSeconds % 3600) / 60, 2)} + ':' +
-        ${#numbers.formatInteger(summary.durationSeconds % 60, 2)}
-    "></span>
-</p>
+    <p><strong>Total Duration:</strong>
+        <span th:text="${summary.durationSeconds != null ?
+            T(java.lang.String).format('%02d:%02d:%02d',
+                summary.durationSeconds / 3600,
+                (summary.durationSeconds % 3600) / 60,
+                summary.durationSeconds % 60)
+            : 'N/A'}">
+        </span>
+    </p>
 
-<p><strong>Total Sets:</strong> <span th:text="${summary.totalSets}"></span></p>
-<p><strong>Total Volume:</strong> <span th:text="${summary.totalVolume}"></span></p>
+    <p><strong>Total Sets:</strong>
+        <span th:text="${summary.totalSets}">0</span>
+    </p>
 
-<h2>Exercises</h2>
-<ul>
-    <li th:each="ex : ${summary.exercises}">
-        <span th:text="${ex.name}"></span> —
-        <span th:text="${ex.sets}"></span> sets,
-        volume <span th:text="${ex.volume}"></span>
-    </li>
-</ul>
+    <p><strong>Total Volume:</strong>
+        <span th:text="${summary.totalVolume}">0</span>
+    </p>
+</div>
 
-<a href="/">Start New Workout</a>
+<div class="exercises">
+    <h2>Exercises</h2>
+
+    <ul>
+        <li th:each="ex : ${summary.exercises}">
+            <span th:text="${ex.name}"></span>
+            —
+            <span th:text="${ex.sets}"></span> sets,
+            volume <span th:text="${ex.volume}"></span>
+        </li>
+    </ul>
+
+    <p th:if="${summary.exercises.isEmpty()}">
+        No exercises recorded.
+    </p>
+</div>
+
+<button onclick="window.location.href='/'">
+    Start New Workout
+</button>
 
 </body>
+
 </html>

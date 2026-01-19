@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Workout History</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    </style>
+</head>
+<body>
+
+<h1>Workout History</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Start</th>
+        <th>End</th>
+        <th>Total Duration</th>
+        <th>Sets</th>
+        <th>Volume</th>
+        <th>Details</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${sessions}">
+        <td class="start" th:attr="data-millis=${s.startMillis}">N/A</td>
+        <td class="end" th:attr="data-millis=${s.endMillis}">N/A</td>
+        <td class="duration">N/A</td>
+        <td th:text="${s.totalSets}">0</td>
+        <td th:text="${s.totalVolume}">0</td>
+        <td>
+            <a th:href="@{'/workout-sessions/' + ${s.id} + '/summary'}">View</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script th:inline="javascript">
+/* ===============================
+   Convert timestamps to readable dates & duration
+=============================== */
+const rows = document.querySelectorAll('tbody tr');
+
+rows.forEach(row => {
+    const startEl = row.querySelector('.start');
+    const endEl = row.querySelector('.end');
+    const durationEl = row.querySelector('.duration');
+
+    const startMillis = parseInt(startEl.dataset.millis, 10);
+    const endMillis = parseInt(endEl.dataset.millis, 10);
+
+    function formatDate(ms) {
+        if (!ms) return "N/A";
+        const d = new Date(ms);
+        return isNaN(d.getTime()) ? "Invalid Date" : d.toLocaleString();
+    }
+
+    startEl.innerText = formatDate(startMillis);
+    endEl.innerText = formatDate(endMillis);
+
+    if (startMillis && endMillis) {
+        const diffMs = endMillis - startMillis;
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        durationEl.innerText =
+            `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+    } else {
+        durationEl.innerText = "N/A";
+    }
+});
+</script>
+
+</body>
+</html>

@@ -183,6 +183,13 @@ public class WorkoutSessionService {
         );
     }
 
+    public List<WorkoutSession> getAllSessions() {
+        return repository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(WorkoutSession::getStartTime).reversed()) // newest first
+                .toList();
+    }
+
 
 
 }
