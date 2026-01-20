@@ -1,32 +1,39 @@
 package com.example.workoutlogger.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import jakarta.persistence.Id;
-
 
 import java.util.UUID;
 
 @Entity
+@Table(name = "workout_template_exercise")
 public class WorkoutTemplateExercise {
 
+    /**
+     * Primary key
+     */
     @Id
     @JdbcTypeCode(SqlTypes.VARCHAR)
-    @Column(length = 36)
+    @Column(nullable = false, updatable = false, length = 36)
     private UUID id;
 
+    /**
+     * “Every workout must be based on a predefined workout (Chest, Arms, etc.)”
+     */
     @ManyToOne(optional = false)
     @JoinColumn(name = "template_id")
     private WorkoutTemplate template;
 
+    /**
+     * Exercise name (free-form, same as WorkoutSet.exerciseName)
+     */
     @Column(nullable = false)
     private String exerciseName;
 
-    protected WorkoutTemplateExercise() {}
+    protected WorkoutTemplateExercise() {
+        // JPA only
+    }
 
     public WorkoutTemplateExercise(WorkoutTemplate template, String exerciseName) {
         this.id = UUID.randomUUID();
@@ -34,7 +41,10 @@ public class WorkoutTemplateExercise {
         this.exerciseName = exerciseName;
     }
 
-    // getters
+    // ------------------
+    // Getters
+    // ------------------
+
     public UUID getId() {
         return id;
     }
@@ -47,4 +57,3 @@ public class WorkoutTemplateExercise {
         return exerciseName;
     }
 }
-
