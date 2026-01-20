@@ -1,6 +1,7 @@
 package com.example.workoutlogger.service;
 
 import com.example.workoutlogger.domain.WorkoutSession;
+import com.example.workoutlogger.domain.WorkoutTemplate;
 import com.example.workoutlogger.repository.WorkoutSessionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -188,6 +189,62 @@ public class WorkoutSessionService {
                 .stream()
                 .sorted(Comparator.comparing(WorkoutSession::getStartTime).reversed()) // newest first
                 .toList();
+    }
+
+    public WorkoutComparisonDto compareToPrevious(UUID currentSessionId) {
+
+        WorkoutSession current = repository.findById(currentSessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        WorkoutTemplate template = current.getTemplate();
+        if (template == null) {
+            throw new IllegalStateException("Session has no template");
+        }
+
+        WorkoutSession previous = repository
+                .findTopByTemplateAndEndTimeBeforeOrderByEndTimeDesc(
+                        template, current.getEndTime()
+                )
+                .orElseThrow(() -> new IllegalStateException("No previous workout"));
+
+        Map<String, Double> prevVolumes = aggregate(previous);
+        Map<String, Double> currVolumes = aggregate(current);
+
+        List<WorkoutComparisonDto.ExerciseComparison> comparisons = new ArrayList<>();
+
+        Set<String> allExercises = new HashSet<>();
+        allExercises.addAll(prevVolumes.keySet());
+        allExercises.addAll(currVolumes.keySet());
+
+        for (String ex : allExercises) {
+            double prev = prevVolumes.getOrDefault(ex, 0.0);
+            double curr = currVolumes.getOrDefault(ex, 0.0);
+
+            comparisons.add(
+                    new WorkoutComparisonDto.ExerciseComparison(
+                            ex, prev, curr, curr - prev
+                    )
+            );
+        }
+
+        double prevTotal = prevVolumes.values().stream().mapToDouble(Double::doubleValue).sum();
+        double currTotal = currVolumes.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        return new WorkoutComparisonDto(
+                prevTotal,
+                currTotal,
+                currTotal - prevTotal,
+                comparisons
+        );
+
+
+    }
+    private Map<String, Double> aggregate(WorkoutSession session) {
+        return session.getSets().stream()
+                .collect(Collectors.groupingBy(
+                        WorkoutSet::getExerciseName,
+                        Collectors.summingDouble(s -> s.getReps() * s.getWeight())
+                ));
     }
 
 

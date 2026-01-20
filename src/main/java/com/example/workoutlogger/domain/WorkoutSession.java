@@ -14,19 +14,10 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "workout_session")
 public class WorkoutSession {
 
-    /**
-     * One workout session can have many sets.
-     *
-     * mappedBy = "session" tells JPA:
-     * - The foreign key lives in WorkoutSet.session
-     * - WorkoutSession does NOT own the relationship
-     *
-     * cascade = ALL:
-     * - If we delete a session, its sets are deleted
-     *
-     * orphanRemoval = true:
-     * - Prevents "dangling" sets if removed from the session
-     */
+    /* ===============================
+       Relationships
+       =============================== */
+
     @OneToMany(
             mappedBy = "session",
             cascade = CascadeType.ALL,
@@ -34,11 +25,18 @@ public class WorkoutSession {
     )
     private List<WorkoutSet> sets = new ArrayList<>();
 
-
     /**
-     * Store UUID as TEXT instead of BLOB.
-     * This makes IDs human-readable and API-friendly.
+     * Every workout session can optionally belong to a template
+     * (e.g. Chest, Arms, Legs).
      */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id")
+    private WorkoutTemplate template;
+
+    /* ===============================
+       Columns
+       =============================== */
+
     @Id
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, updatable = false, length = 36)
@@ -52,6 +50,10 @@ public class WorkoutSession {
     @Column(nullable = false)
     private String status;
 
+    /* ===============================
+       Constructors
+       =============================== */
+
     protected WorkoutSession() {
         // JPA only
     }
@@ -62,7 +64,19 @@ public class WorkoutSession {
         this.status = status;
     }
 
-    // Getters only (immutability-lite)
+    /* ===============================
+       Domain behavior
+       =============================== */
+
+    public void end(Instant endTime) {
+        this.endTime = endTime;
+        this.status = "COMPLETED";
+    }
+
+    /* ===============================
+       Getters / Setters
+       =============================== */
+
     public UUID getId() {
         return id;
     }
@@ -79,12 +93,15 @@ public class WorkoutSession {
         return status;
     }
 
-    public void end(Instant endTime) {
-        this.endTime = endTime;
-        this.status = "COMPLETED";
-    }
-
     public List<WorkoutSet> getSets() {
         return sets;
+    }
+
+    public WorkoutTemplate getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(WorkoutTemplate template) {
+        this.template = template;
     }
 }
