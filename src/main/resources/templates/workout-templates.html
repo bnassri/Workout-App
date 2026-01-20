@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Workout Templates</title>
+</head>
+<body>
+
+<h1>Select a Workout</h1>
+
+<ul>
+    <li th:each="t : ${templates}">
+        <strong th:text="${t.name}"></strong>
+        <a th:href="@{/workout-sessions/new(templateId=${t.id})}">
+            Start Workout
+        </a>
+    </li>
+</ul>
+
+</body>
+</html>

@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+// Finds the most recent completed session for the same template
+// that ended BEFORE the given session
 public interface WorkoutSessionRepository
         extends JpaRepository<WorkoutSession, UUID> {
     Optional<WorkoutSession>
