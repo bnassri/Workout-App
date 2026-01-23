@@ -4,10 +4,7 @@ import com.example.workoutlogger.domain.WorkoutTemplate;
 import com.example.workoutlogger.service.WorkoutTemplateService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,9 +25,6 @@ public class WorkoutTemplatePageController {
     /**
      * Show all available workout templates.
      */
-    /**
-     * Show all available workout templates.
-     */
     @GetMapping
     public String templates(Model model) {
         List<WorkoutTemplate> templates = templateService.getAllTemplates();
@@ -41,20 +35,25 @@ public class WorkoutTemplatePageController {
 
     // Show the form to create a new template
     @GetMapping("/create")
-    public String showCreateForm() {
-        return "create-template"; // corresponds to create-template.html
+    public String createTemplateForm(Model model) {
+        return "template-create";
     }
 
     // Handle form submission
     @PostMapping("/create")
-    public String createTemplate(String name, String exercises) {
-        // Split exercises by comma and trim spaces
-        List<String> exerciseList = Arrays.stream(exercises.split(","))
+    public String createTemplateSubmit(
+            @RequestParam String name,
+            @RequestParam String exerciseNames) {
+
+        // Split comma-separated exercises
+        List<String> exercises = List.of(exerciseNames.split(","))
+                .stream()
                 .map(String::trim)
+                .filter(s -> !s.isEmpty())
                 .toList();
 
         // Call the service to create the template
-        templateService.createTemplate(name, exerciseList);
+        templateService.createTemplate(name, exercises);
 
         // Redirect back to templates list
         return "redirect:/templates";

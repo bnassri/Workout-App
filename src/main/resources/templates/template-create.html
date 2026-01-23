@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Workout Template</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .exercise-list { margin-top: 1rem; padding-left: 1rem; }
+        input { padding: 0.25rem; margin-right: 0.5rem; }
+        button { padding: 0.5rem 1rem; margin-top: 0.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h1>Create Workout Template</h1>
+
+<a href="/templates"><button>Back to Templates</button></a>
+
+<form action="/templates/create" method="post" id="template-form">
+    <div>
+        <label for="name">Template Name:</label>
+        <input type="text" id="name" name="name" required />
+    </div>
+
+    <div>
+        <label for="exerciseInput">Exercises:</label>
+        <input type="text" id="exerciseInput" />
+        <button type="button" id="addExercise">Add Exercise</button>
+    </div>
+
+    <ul class="exercise-list" id="exerciseList"></ul>
+
+    <!-- Hidden input to store exercises for form submission -->
+    <input type="hidden" name="exerciseNames" id="exerciseNames" />
+
+    <button type="submit">Create Template</button>
+</form>
+
+<script>
+    const exerciseInput = document.getElementById('exerciseInput');
+    const addButton = document.getElementById('addExercise');
+    const exerciseList = document.getElementById('exerciseList');
+    const exerciseNamesInput = document.getElementById('exerciseNames');
+
+    const exercises = [];
+
+    addButton.addEventListener('click', () => {
+        const name = exerciseInput.value.trim();
+        if (name) {
+            exercises.push(name);
+
+            const li = document.createElement('li');
+            li.textContent = name;
+            exerciseList.appendChild(li);
+
+            // Update hidden input for form submission
+            exerciseNamesInput.value = exercises.join(',');
+
+            exerciseInput.value = '';
+            exerciseInput.focus();
+        }
+    });
+
+    document.getElementById('template-form').addEventListener('submit', () => {
+        // Ensure hidden input has current exercises
+        exerciseNamesInput.value = exercises.join(',');
+    });
+</script>
+
+</body>
+</html>
