@@ -14,20 +14,15 @@
 <body>
 
 <h1>Workout Logger</h1>
-<!-- Go manage workout templates -->
-<a href="/templates">
-    <button>Manage Workout Templates</button>
-</a>
 
-<!-- Start an ad-hoc workout -->
-<form action="/workout-sessions/start" method="post">
-    <button type="submit">Start Workout</button>
-</form>
-
-<!-- View history later -->
-<a href="/history">
-    <button>Workout History</button>
-</a>
+<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+    <a href="/templates"><button>Manage Workout Templates</button></a>
+    <a href="/templates"><button>View Workout Templates</button></a>
+    <form action="/workout-sessions/start" method="post" style="margin: 0;">
+        <button type="submit">Start Workout</button>
+    </form>
+    <a href="/history"><button>Workout History</button></a>
+</div>
 
 </body>
 </html>

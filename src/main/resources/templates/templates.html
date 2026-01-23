@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Workout Templates</title>
+</head>
+<body>
+
+<h1>Workout Templates</h1>
+
+<div th:if="${templates.isEmpty()}">
+    <p>No templates created yet.</p>
+</div>
+
+<ul th:if="${!templates.isEmpty()}">
+    <li th:each="template : ${templates}">
+        <span th:text="${template.name}"></span>
+    </li>
+</ul>
+
+<a href="/">Back to Home</a>
+
+</body>
+</html>
