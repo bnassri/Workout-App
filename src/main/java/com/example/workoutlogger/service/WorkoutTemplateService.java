@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.UUID;
 @Service
 public class WorkoutTemplateService {
-    private final WorkoutTemplateRepository repository;
+    private final WorkoutTemplateRepository templateRepository;
 
     public WorkoutTemplateService(WorkoutTemplateRepository repository) {
-        this.repository = repository;
+        this.templateRepository = repository;
     }
 
     /**
@@ -26,7 +26,7 @@ public class WorkoutTemplateService {
             template.addExercise(exerciseName);
         }
 
-        return repository.save(template);
+        return templateRepository.save(template);
     }
 
 
@@ -35,14 +35,14 @@ public class WorkoutTemplateService {
      * Used for selection UI.
      */
     public List<WorkoutTemplate> getAllTemplates() {
-        return repository.findAll();
+        return templateRepository.findAll();
     }
 
     /**
      * Fetch a single template.
      */
     public WorkoutTemplate getTemplate(UUID id) {
-        return repository.findById(id)
+        return templateRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Template not found"));
     }
 }

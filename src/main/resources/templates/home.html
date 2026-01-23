@@ -1,16 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Workout Logger</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .template { margin-bottom: 1rem; }
+        button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
+        input { padding: 0.25rem; margin-right: 0.5rem; }
+    </style>
 </head>
 <body>
 
 <h1>Workout Logger</h1>
+<!-- Go manage workout templates -->
+<a href="/templates">
+    <button>Manage Workout Templates</button>
+</a>
 
+<!-- Start an ad-hoc workout -->
 <form action="/workout-sessions/start" method="post">
     <button type="submit">Start Workout</button>
 </form>
+
+<!-- View history later -->
+<a href="/history">
+    <button>Workout History</button>
+</a>
 
 </body>
 </html>
