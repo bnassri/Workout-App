@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Renders pages related to workout templates.
@@ -46,8 +47,7 @@ public class WorkoutTemplatePageController {
             @RequestParam String exerciseNames) {
 
         // Split comma-separated exercises
-        List<String> exercises = List.of(exerciseNames.split(","))
-                .stream()
+        List<String> exercises = Stream.of(exerciseNames.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
