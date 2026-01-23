@@ -3,23 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Workout Logger</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        h1 { margin-bottom: 1rem; }
-        .template { margin-bottom: 1rem; }
-        button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
-        input { padding: 0.25rem; margin-right: 0.5rem; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
 <h1>Workout Logger</h1>
 
-<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+<!-- Button Container -->
+<div class="button-row">
     <a href="/templates"><button>Manage Workout Templates</button></a>
     <a href="/templates"><button>View Workout Templates</button></a>
     <a href="/templates/create"><button>Create New Template</button></a>
-    <form action="/workout-sessions/start" method="post" style="margin: 0;">
+    <form action="/workout-sessions/start" method="post">
         <button type="submit">Start Workout</button>
     </form>
     <a href="/history"><button>Workout History</button></a>

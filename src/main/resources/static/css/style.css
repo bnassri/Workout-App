@@ -1,0 +1,19 @@
+/* Container for buttons with spacing */
+.button-row {
+    display: flex;
+    gap: 1rem;          /* space between buttons */
+    flex-wrap: wrap;    /* wrap to next line if needed */
+    margin-bottom: 1rem;
+}
+
+/* Remove default form margins */
+.button-row form {
+    margin: 0;
+}
+
+/* Style all buttons consistently */
+.button-row button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
