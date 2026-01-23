@@ -28,13 +28,16 @@ public class WorkoutTemplatePageController {
     /**
      * Show all available workout templates.
      */
+    /**
+     * Show all available workout templates.
+     */
     @GetMapping
     public String templates(Model model) {
-        // Fetch all templates to display
         List<WorkoutTemplate> templates = templateService.getAllTemplates();
         model.addAttribute("templates", templates);
-        return "templates";
+        return "templates-list"; // updated to the new Thymeleaf file
     }
+
 
     // Show the form to create a new template
     @GetMapping("/create")

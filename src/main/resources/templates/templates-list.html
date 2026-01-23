@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Workout Templates</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .template { margin-bottom: 1rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 5px; }
+        ul { padding-left: 1.2rem; }
+        button { padding: 0.5rem 1rem; margin-top: 0.5rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h1>Workout Templates</h1>
+
+<a href="/templates/create">
+    <button>Create New Template</button>
+</a>
+<a href="/"><button>Back to Home</button></a>
+
+<hr>
+
+<!-- If there are templates -->
+<div th:if="${templates != null and !templates.isEmpty()}">
+    <div th:each="template : ${templates}" class="template">
+        <h2 th:text="${template.name}">Template Name</h2>
+        <ul>
+            <li th:each="exercise : ${template.exercises}" th:text="${exercise.exerciseName}">Exercise</li>
+        </ul>
+    </div>
+</div>
+
+<!-- If no templates exist -->
+<div th:if="${templates == null or templates.isEmpty()}">
+    <p>No workout templates found.</p>
+</div>
+
+</body>
+</html>
