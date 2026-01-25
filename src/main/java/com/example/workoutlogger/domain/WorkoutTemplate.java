@@ -61,6 +61,11 @@ public class WorkoutTemplate {
         return exercises;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
     // ------------------
     // Helper methods
     // ------------------

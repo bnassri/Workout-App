@@ -10,39 +10,42 @@ import java.util.List;
 import java.util.UUID;
 @Service
 public class WorkoutTemplateService {
-    private final WorkoutTemplateRepository templateRepository;
+
+    private final WorkoutTemplateRepository repository;
 
     public WorkoutTemplateService(WorkoutTemplateRepository repository) {
-        this.templateRepository = repository;
+        this.repository = repository;
+    }
+
+    public List<WorkoutTemplate> getAllTemplates() {
+        return repository.findAll();
+    }
+
+    public WorkoutTemplate getTemplateById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Template not found"));
     }
 
     /**
-     * Create a new workout template (e.g. "Chest Day").
+     * Update template name and exercises safely.
      */
-    public WorkoutTemplate createTemplate(String name, List<String> exerciseNames) {
-        WorkoutTemplate template = new WorkoutTemplate(name);
+    public void updateTemplate(UUID id, String name, List<String> exerciseNames) {
+        WorkoutTemplate template = getTemplateById(id);
 
-        for (String exerciseName : exerciseNames) {
-            template.addExercise(exerciseName);
+        // Update name
+        template.setName(name);
+
+        // Clear existing exercises (orphanRemoval = true deletes rows)
+        template.getExercises().clear();
+
+        // Re-add exercises
+        if (exerciseNames != null) {
+            exerciseNames.stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .forEach(template::addExercise);
         }
 
-        return templateRepository.save(template);
-    }
-
-
-    /**
-     * Fetch all workout templates.
-     * Used for selection UI.
-     */
-    public List<WorkoutTemplate> getAllTemplates() {
-        return templateRepository.findAll();
-    }
-
-    /**
-     * Fetch a single template.
-     */
-    public WorkoutTemplate getTemplate(UUID id) {
-        return templateRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Template not found"));
+        repository.save(template);
     }
 }

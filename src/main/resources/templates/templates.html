@@ -2,6 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Workout Templates</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .template-list { list-style: none; padding: 0; }
+        .template-list li { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        button { padding: 0.25rem 0.5rem; cursor: pointer; }
+    </style>
 </head>
 <body>
 
@@ -11,13 +18,17 @@
     <p>No templates created yet.</p>
 </div>
 
-<ul th:if="${!templates.isEmpty()}">
+<ul class="template-list" th:if="${!templates.isEmpty()}">
     <li th:each="template : ${templates}">
         <span th:text="${template.name}"></span>
+        <a th:href="@{/templates/edit/{id}(id=${template.id})}">
+            <button>Edit</button>
+        </a>
     </li>
 </ul>
 
-<a href="/">Back to Home</a>
+<a href="/templates/create"><button>Create New Template</button></a>
+<a href="/"><button>Back to Home</button></a>
 
 </body>
 </html>

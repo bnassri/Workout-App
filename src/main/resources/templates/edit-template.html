@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Template</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        input { padding: 0.25rem; margin-bottom: 0.5rem; }
+        .exercise-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<h1>Edit Workout Template</h1>
+
+<form th:action="@{/templates/edit/{id}(id=${template.id})}" method="post">
+
+    <!-- Template name -->
+    <label>
+        Template Name:
+        <input type="text" name="name" th:value="${template.name}" required>
+    </label>
+
+    <h3>Exercises</h3>
+
+    <!-- Existing exercises -->
+    <div th:each="exercise : ${template.exercises}" class="exercise-row">
+        <input type="text"
+               name="exerciseNames"
+               th:value="${exercise.exerciseName}">
+    </div>
+
+    <!-- Empty input to allow adding new exercises -->
+    <div class="exercise-row">
+        <input type="text" name="exerciseNames" placeholder="Add new exercise">
+    </div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<br>
+
+<a href="/templates">
+    <button>Back to Templates</button>
+</a>
+
+</body>
+</html>
+

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -41,23 +42,23 @@ public class WorkoutTemplatePageController {
     }
 
     // Handle form submission
-    @PostMapping("/create")
-    public String createTemplateSubmit(
+    @PostMapping("/edit/{id}")
+    public String updateTemplate(
+            @PathVariable UUID id,
             @RequestParam String name,
-            @RequestParam String exerciseNames) {
-
-        // Split comma-separated exercises
-        List<String> exercises = Stream.of(exerciseNames.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-
-        // Call the service to create the template
-        templateService.createTemplate(name, exercises);
-
-        // Redirect back to templates list
+            @RequestParam(required = false) List<String> exerciseNames
+    ) {
+        templateService.updateTemplate(id, name, exerciseNames);
         return "redirect:/templates";
     }
 
+    @GetMapping("/edit/{id}")
+    public String editTemplate(@PathVariable UUID id, Model model) {
+        WorkoutTemplate template = templateService.getTemplateById(id);
+
+        model.addAttribute("template", template);
+
+        return "edit-template"; // <-- template-edit.html
+    }
 
 }
