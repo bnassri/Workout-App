@@ -1,11 +1,9 @@
 package com.example.workoutlogger.service;
 
-import com.example.workoutlogger.domain.WorkoutSession;
-import com.example.workoutlogger.domain.WorkoutTemplate;
+import com.example.workoutlogger.domain.*;
 import com.example.workoutlogger.repository.WorkoutSessionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import com.example.workoutlogger.repository.WorkoutSetRepository;
 import com.example.workoutlogger.dto.*;
@@ -34,6 +32,9 @@ public class WorkoutSessionService {
         this.setRepository = setRepository;
     }
 
+    /**
+     * Start an ad-hoc workout session (no template)
+     */
     public WorkoutSession startSession() {
         WorkoutSession session = new WorkoutSession(
                 UUID.randomUUID(),
@@ -41,6 +42,37 @@ public class WorkoutSessionService {
                 "IN_PROGRESS"
         );
         return repository.save(session);
+    }
+
+    /**
+     * Start a workout session from a template
+     */
+    public WorkoutSession startSession(WorkoutTemplate template) {
+        // Create session linked to template
+        WorkoutSession session = new WorkoutSession(
+                UUID.randomUUID(),
+                Instant.now(),
+                "IN_PROGRESS"
+        );
+        session.setTemplate(template);
+
+        // Save session first to get an ID (if using DB-generated IDs)
+        WorkoutSession savedSession = repository.save(session);
+
+        // Copy exercises from template into the session
+        for (WorkoutTemplateExercise templateExercise : template.getExercises()) {
+            WorkoutSet set = new WorkoutSet(
+                    UUID.randomUUID(),
+                    session,
+                    templateExercise.getExerciseName(),
+                    0,
+                    0,
+                    Instant.now()
+            );
+            setRepository.save(set);
+        }
+
+        return session;
     }
 
 
@@ -246,6 +278,7 @@ public class WorkoutSessionService {
                         Collectors.summingDouble(s -> s.getReps() * s.getWeight())
                 ));
     }
+
 
 
 

@@ -15,8 +15,20 @@
     <a href="/templates"><button>View Workout Templates</button></a>
     <a href="/templates/create"><button>Create New Template</button></a>
     <form action="/workout-sessions/start" method="post">
+        <select name="templateId">
+            <option th:each="template : ${templates}"
+                    th:value="${template.id}"
+                    th:text="${template.name}">
+            </option>
+        </select>
         <button type="submit">Start Workout</button>
     </form>
+
+    <form action="/workout-sessions/start" method="post">
+        <button type="submit">Start Ad-Hoc Workout</button>
+    </form>
+
+
     <a href="/history"><button>Workout History</button></a>
 </div>
 

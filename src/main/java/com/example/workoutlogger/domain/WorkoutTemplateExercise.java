@@ -56,4 +56,6 @@ public class WorkoutTemplateExercise {
     public String getExerciseName() {
         return exerciseName;
     }
+
+
 }

@@ -54,7 +54,7 @@ public class WorkoutSession {
        Constructors
        =============================== */
 
-    protected WorkoutSession() {
+    public WorkoutSession() {
         // JPA only
     }
 
