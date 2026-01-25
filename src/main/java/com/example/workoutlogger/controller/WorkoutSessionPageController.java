@@ -1,6 +1,7 @@
 package com.example.workoutlogger.controller;
 
 import com.example.workoutlogger.domain.WorkoutSession;
+import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.domain.WorkoutTemplate;
 import com.example.workoutlogger.service.WorkoutSessionService;
 import com.example.workoutlogger.service.WorkoutTemplateService;
@@ -8,8 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/workout-sessions")
@@ -64,8 +65,15 @@ public class WorkoutSessionPageController {
             Model model
     ) {
         WorkoutSession session = sessionService.getSession(id);
+        // Group sets by exercise name
+        Map<String, List<WorkoutSet>> setsByExercise = new LinkedHashMap<>();
+        for (WorkoutSet set : session.getSets()) {
+            setsByExercise.computeIfAbsent(set.getExerciseName(), k -> new ArrayList<>())
+                    .add(set);
+        }
 
         model.addAttribute("session", session);
+        model.addAttribute("setsByExercise", setsByExercise);
         model.addAttribute("sessionId", session.getId());
         model.addAttribute(
                 "startTimeMillis",
@@ -74,4 +82,5 @@ public class WorkoutSessionPageController {
 
         return "workout-session";
     }
+
 }

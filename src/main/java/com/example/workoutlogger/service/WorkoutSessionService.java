@@ -47,6 +47,7 @@ public class WorkoutSessionService {
     /**
      * Start a workout session from a template
      */
+    @Transactional
     public WorkoutSession startSession(WorkoutTemplate template) {
         // Create session linked to template
         WorkoutSession session = new WorkoutSession(
@@ -63,7 +64,7 @@ public class WorkoutSessionService {
         for (WorkoutTemplateExercise templateExercise : template.getExercises()) {
             WorkoutSet set = new WorkoutSet(
                     UUID.randomUUID(),
-                    session,
+                    savedSession,
                     templateExercise.getExerciseName(),
                     0,
                     0,
@@ -72,7 +73,7 @@ public class WorkoutSessionService {
             setRepository.save(set);
         }
 
-        return session;
+        return savedSession;
     }
 
 
