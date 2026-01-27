@@ -1,14 +1,19 @@
 package com.example.workoutlogger.controller;
 
+import com.example.workoutlogger.dto.AddWorkoutSetRequest;
+import com.example.workoutlogger.repository.WorkoutSessionRepository;
+import com.example.workoutlogger.repository.WorkoutSetRepository;
 import com.example.workoutlogger.domain.WorkoutSession;
 import com.example.workoutlogger.domain.WorkoutSet;
 import com.example.workoutlogger.domain.WorkoutTemplate;
+import com.example.workoutlogger.domain.WorkoutTemplateExercise;
 import com.example.workoutlogger.service.WorkoutSessionService;
 import com.example.workoutlogger.service.WorkoutTemplateService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,16 +21,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/workout-sessions")
 public class WorkoutSessionPageController {
 
-    private final WorkoutSessionService sessionService;
+    private final WorkoutSessionService workoutSessionService;
     private final WorkoutTemplateService templateService;
 
     public WorkoutSessionPageController(
             WorkoutSessionService sessionService,
             WorkoutTemplateService templateService
     ) {
-        this.sessionService = sessionService;
+        this.workoutSessionService = sessionService;
         this.templateService = templateService;
     }
+
 
     /**
      * Render the start workout page (optional: show template selection)
@@ -48,9 +54,10 @@ public class WorkoutSessionPageController {
 
         if (templateId != null) {
             WorkoutTemplate template = templateService.getTemplateById(templateId);
-            session = sessionService.startSession(template);
+            session = workoutSessionService.startSession(template);
         } else {
-            session = sessionService.startSession();
+            session = workoutSessionService
+                    .startSession();
         }
 
         return "redirect:/workout-sessions/" + session.getId();
@@ -59,12 +66,31 @@ public class WorkoutSessionPageController {
     /**
      * Renders the workout session page
      */
+
     @GetMapping("/{id}")
     public String workoutSessionPage(
             @PathVariable UUID id,
             Model model
     ) {
-        WorkoutSession session = sessionService.getSession(id);
+        WorkoutSession session = workoutSessionService.getSession(id);
+
+        // If session has a template but no sets yet, pre-populate one blank set per exercise
+        if (session.getTemplate() != null && session.getSets().isEmpty()) {
+            for (WorkoutTemplateExercise templateExercise : session.getTemplate().getExercises()) {
+                WorkoutSet blankSet = new WorkoutSet(
+                        UUID.randomUUID(),
+                        session,
+                        templateExercise.getExerciseName(),
+                        0, // default reps
+                        0, // default weight
+                        Instant.now()
+                );
+                session.getSets().add(blankSet);
+                // Save directly via repository
+                workoutSessionService.saveSet(blankSet);
+            }
+        }
+
         // Group sets by exercise name
         Map<String, List<WorkoutSet>> setsByExercise = new LinkedHashMap<>();
         for (WorkoutSet set : session.getSets()) {
@@ -73,14 +99,26 @@ public class WorkoutSessionPageController {
         }
 
         model.addAttribute("session", session);
-        model.addAttribute("setsByExercise", setsByExercise);
         model.addAttribute("sessionId", session.getId());
-        model.addAttribute(
-                "startTimeMillis",
-                session.getStartTime().toEpochMilli()
-        );
+        model.addAttribute("startTimeMillis", session.getStartTime().toEpochMilli());
+        model.addAttribute("setsByExercise", setsByExercise);
 
         return "workout-session";
+    }
+
+    @PostMapping("/{id}/sets/add")
+    public String addSet(
+            @PathVariable UUID id,
+            @RequestParam String exerciseName
+    ) {
+        AddWorkoutSetRequest request = new AddWorkoutSetRequest();
+        request.setExerciseName(exerciseName);
+        request.setReps(0);
+        request.setWeight(0);
+
+        workoutSessionService.addSet(id, request);
+
+        return "redirect:/workout-sessions/" + id;
     }
 
 }

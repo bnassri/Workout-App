@@ -18,4 +18,9 @@ public class AddWorkoutSetRequest {
     public double getWeight() {
         return weight;
     }
+
+    // setters
+    public void setExerciseName(String exerciseName) { this.exerciseName = exerciseName; }
+    public void setReps(int reps) { this.reps = reps; }
+    public void setWeight(double weight) { this.weight = weight; }
 }

@@ -12,6 +12,10 @@
 <input type="hidden" id="sessionId" th:value="${sessionId}" >
 <h2>Workout Timers</h2>
 
+
+<!-- DEBUG: remove later -->
+<p th:text="'Session ID: ' + ${session.id}"></p>
+
 <div>
     <strong>Total Workout Time:</strong>
     <span id="workoutTimer">00:00:00</span>
@@ -36,7 +40,7 @@
         </tr>
 
         <tr th:each="set : ${exerciseGroup.value}">
-            <form th:action="@{/sessions/{id}/sets/{setId}(id=${session.id}, setId=${set.id})}"
+            <form th:action="@{/workout-sessions/{id}/sets/{setId}(id=${session.id}, setId=${set.id})}"
                   method="post">
                 <td>
                     <input type="number" name="reps" th:value="${set.reps}">
@@ -52,14 +56,19 @@
 
         <tr>
             <td colspan="3">
-                <form th:action="@{/sessions/{id}/sets/add(id=${session.id})}" method="post">
-                    <input type="hidden" name="exerciseName" th:value="${exerciseGroup.key}">
+                <form th:if="${session.id != null}"
+                      th:action="@{/workout-sessions/{id}/sets/add(id=${session.id})}"
+                      method="post">
+                    <input type="hidden" name="exerciseName"
+                           th:value="${exerciseGroup.key}">
                     <button type="submit">+ Add Set</button>
                 </form>
             </td>
         </tr>
     </table>
 </div>
+
+
 
 
 <h2>Session Summary</h2>
@@ -225,13 +234,7 @@ summaryPoller = setInterval(loadSummary, 3000);
 </script>
 
 
-
-
-
-
-
 <button onclick="endWorkout()">End Workout</button>
-
 
 </body>
 </html>

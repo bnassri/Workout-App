@@ -32,6 +32,10 @@ public class WorkoutSessionService {
         this.setRepository = setRepository;
     }
 
+    public WorkoutSet saveSet(WorkoutSet set) {
+        return setRepository.save(set);
+    }
+
     /**
      * Start an ad-hoc workout session (no template)
      */
@@ -49,7 +53,6 @@ public class WorkoutSessionService {
      */
     @Transactional
     public WorkoutSession startSession(WorkoutTemplate template) {
-        // Create session linked to template
         WorkoutSession session = new WorkoutSession(
                 UUID.randomUUID(),
                 Instant.now(),
@@ -57,10 +60,8 @@ public class WorkoutSessionService {
         );
         session.setTemplate(template);
 
-        // Save session first to get an ID (if using DB-generated IDs)
         WorkoutSession savedSession = repository.save(session);
 
-        // Copy exercises from template into the session
         for (WorkoutTemplateExercise templateExercise : template.getExercises()) {
             WorkoutSet set = new WorkoutSet(
                     UUID.randomUUID(),
@@ -73,8 +74,9 @@ public class WorkoutSessionService {
             setRepository.save(set);
         }
 
-        return savedSession;
+        return savedSession; // ✅ THIS MUST BE savedSession
     }
+
 
 
     public WorkoutSet addSet(UUID sessionId, AddWorkoutSetRequest request) {
@@ -249,6 +251,7 @@ public class WorkoutSessionService {
         allExercises.addAll(prevVolumes.keySet());
         allExercises.addAll(currVolumes.keySet());
 
+
         for (String ex : allExercises) {
             double prev = prevVolumes.getOrDefault(ex, 0.0);
             double curr = currVolumes.getOrDefault(ex, 0.0);
@@ -279,8 +282,6 @@ public class WorkoutSessionService {
                         Collectors.summingDouble(s -> s.getReps() * s.getWeight())
                 ));
     }
-
-
 
 
 }
