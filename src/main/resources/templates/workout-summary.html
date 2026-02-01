@@ -4,17 +4,166 @@
     <meta charset="UTF-8">
     <title>Workout Summary</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            max-width: 900px;
+        }
         h1 { margin-bottom: 1rem; }
-        .summary { margin-bottom: 2rem; }
+        h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .summary p {
+            margin: 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
         .exercises { margin-top: 1rem; }
         .exercise { margin-bottom: 0.5rem; }
-        a { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; display: inline-block; }
+
+        /* Comparison Styles */
+        .comparison-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .comparison-header h2 {
+            color: white;
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        .total-comparison {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .total-stat {
+            text-align: center;
+        }
+
+        .total-stat .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-stat .value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .delta {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+
+        .delta.positive { color: #4ade80; }
+        .delta.negative { color: #f87171; }
+        .delta.neutral { color: #fbbf24; }
+
+        .exercise-comparisons {
+            background: white;
+            color: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .exercise-comparison {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .exercise-comparison:hover {
+            background: #e9ecef;
+        }
+
+        .exercise-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .exercise-volumes {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .volume-stat {
+            text-align: center;
+        }
+
+        .volume-stat .label {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .volume-stat .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .exercise-delta {
+            min-width: 120px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
 
-<h1>Workout Summary</h1>
+<h1>🎉 Workout Complete!</h1>
 
 <div class="summary">
     <p><strong>Start:</strong>
@@ -44,19 +193,79 @@
     </p>
 
     <p><strong>Total Volume:</strong>
-        <span th:text="${summary.totalVolume}">0</span>
+        <span th:text="${#numbers.formatDecimal(summary.totalVolume, 1, 2)}">0</span> kg
     </p>
 </div>
 
+<!-- Comparison Section - Only shows if there's a previous workout to compare -->
+<div th:if="${hasComparison}" class="comparison-container">
+    <div class="comparison-header">
+        <h2>📊 Progress vs Last Workout</h2>
+    </div>
+
+    <div class="total-comparison">
+        <div class="total-stat">
+            <div class="label">Previous Total Volume</div>
+            <div class="value" th:text="${#numbers.formatDecimal(comparison.previousTotalVolume, 1, 2)}">0</div>
+            <div>kg</div>
+        </div>
+
+        <div class="total-stat">
+            <div class="label">Current Total Volume</div>
+            <div class="value" th:text="${#numbers.formatDecimal(comparison.currentTotalVolume, 1, 2)}">0</div>
+            <div>kg</div>
+        </div>
+
+        <div class="total-stat">
+            <div class="label">Change</div>
+            <div class="delta"
+                 th:classappend="${comparison.totalDelta > 0 ? 'positive' : (comparison.totalDelta < 0 ? 'negative' : 'neutral')}">
+                <span th:if="${comparison.totalDelta > 0}" class="arrow">↗</span>
+                <span th:if="${comparison.totalDelta < 0}" class="arrow">↘</span>
+                <span th:if="${comparison.totalDelta == 0}" class="arrow">→</span>
+                <span th:text="${comparison.totalDelta > 0 ? '+' : ''} + ${#numbers.formatDecimal(comparison.totalDelta, 1, 2)}">0</span> kg
+            </div>
+        </div>
+    </div>
+
+    <div class="exercise-comparisons">
+        <h3 style="margin-top: 0;">Exercise Breakdown</h3>
+
+        <div th:each="ex : ${comparison.exercises}" class="exercise-comparison">
+            <div class="exercise-name" th:text="${ex.exercise}">Exercise</div>
+
+            <div class="exercise-volumes">
+                <div class="volume-stat">
+                    <div class="label">Previous</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ex.previousVolume, 1, 1)}">0</div>
+                </div>
+
+                <div class="volume-stat">
+                    <div class="label">Current</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ex.currentVolume, 1, 1)}">0</div>
+                </div>
+            </div>
+
+            <div class="exercise-delta"
+                 th:classappend="${ex.delta > 0 ? 'positive' : (ex.delta < 0 ? 'negative' : 'neutral')}">
+                <span th:if="${ex.delta > 0}">↗</span>
+                <span th:if="${ex.delta < 0}">↘</span>
+                <span th:if="${ex.delta == 0}">→</span>
+                <span th:text="${ex.delta > 0 ? '+' : ''} + ${#numbers.formatDecimal(ex.delta, 1, 1)}">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="exercises">
-    <h2>Exercises</h2>
+    <h2>Today's Exercises</h2>
 
     <ul>
-        <li th:each="ex : ${summary.exercises}">
-            <span th:text="${ex.name}"></span>
+        <li th:each="ex : ${summary.exercises}" class="exercise">
+            <strong><span th:text="${ex.name}"></span></strong>
             —
             <span th:text="${ex.sets}"></span> sets,
-            volume <span th:text="${ex.volume}"></span>
+            volume <span th:text="${#numbers.formatDecimal(ex.volume, 1, 2)}"></span> kg
         </li>
     </ul>
 
@@ -69,6 +278,9 @@
     Start New Workout
 </button>
 
-</body>
+<button onclick="window.location.href='/workout-history'" style="background: #6c757d;">
+    View All Workouts
+</button>
 
+</body>
 </html>
