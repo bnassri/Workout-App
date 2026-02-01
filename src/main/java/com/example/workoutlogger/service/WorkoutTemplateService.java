@@ -48,4 +48,11 @@ public class WorkoutTemplateService {
 
         repository.save(template);
     }
+
+    public WorkoutTemplate createTemplate(String name) {
+        WorkoutTemplate template = new WorkoutTemplate();
+        template.setName(name);
+
+        return repository.save(template);
+    }
 }

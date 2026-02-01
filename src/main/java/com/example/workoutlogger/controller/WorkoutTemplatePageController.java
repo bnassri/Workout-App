@@ -52,6 +52,17 @@ public class WorkoutTemplatePageController {
         return "redirect:/templates";
     }
 
+    @GetMapping("/{id}")
+    public String viewTemplate(
+            @PathVariable UUID id,
+            Model model
+    ) {
+        WorkoutTemplate template = templateService.getTemplateById(id);
+        model.addAttribute("template", template);
+        return "template-detail";
+    }
+
+
     @GetMapping("/edit/{id}")
     public String editTemplate(@PathVariable UUID id, Model model) {
         WorkoutTemplate template = templateService.getTemplateById(id);
@@ -59,6 +70,13 @@ public class WorkoutTemplatePageController {
         model.addAttribute("template", template);
 
         return "edit-template"; // <-- template-edit.html
+    }
+    @PostMapping("/templates/create")
+    public String createTemplate(
+            @RequestParam String name
+    ) {
+        WorkoutTemplate template = templateService.createTemplate(name);
+        return "redirect:/templates/" + template.getId();
     }
 
 }

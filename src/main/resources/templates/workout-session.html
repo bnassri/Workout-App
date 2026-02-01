@@ -1,31 +1,15 @@
 <!DOCTYPE html>
-<<html xmlns:th="http://www.thymeleaf.org">>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Workout Logger</title>
 </head>
 <body>
 
+<h2 id="workoutTimer">00:00:00</h2>
 <h1>Workout Logger</h1>
 
-<!-- Store session ID in the page -->
-<input type="hidden" id="sessionId" th:value="${sessionId}" >
-<h2>Workout Timers</h2>
-
-
-<!-- DEBUG: remove later -->
-<p th:text="'Session ID: ' + ${session.id}"></p>
-
-<div>
-    <strong>Total Workout Time:</strong>
-    <span id="workoutTimer">00:00:00</span>
-</div>
-
-<div>
-    <strong>Rest Timer:</strong>
-    <span id="restTimer">00:00</span>
-</div>
-
+<input type="hidden" id="sessionId" th:value="${sessionId}">
 
 <h2>Add Sets</h2>
 
@@ -33,31 +17,32 @@
     <h3 th:text="${exerciseGroup.key}">Exercise Name</h3>
 
     <table>
+        <thead>
         <tr>
             <th>Reps</th>
             <th>Weight</th>
             <th>Save</th>
         </tr>
+        </thead>
 
+        <tbody>
         <tr th:each="set : ${exerciseGroup.value}">
-            <form th:action="@{/workout-sessions/{id}/sets/{setId}(id=${session.id}, setId=${set.id})}"
-                  method="post">
-                <td>
+            <td colspan="3">
+                <form th:action="@{/workout-sessions/{id}/sets/{setId}(id=${sessionId}, setId=${set.id})}"
+                      method="post"
+                      style="display:flex; gap:12px">
+
                     <input type="number" name="reps" th:value="${set.reps}">
-                </td>
-                <td>
                     <input type="number" name="weight" th:value="${set.weight}">
-                </td>
-                <td>
                     <button type="submit">Save</button>
-                </td>
-            </form>
+
+                </form>
+            </td>
         </tr>
 
         <tr>
             <td colspan="3">
-                <form th:if="${session.id != null}"
-                      th:action="@{/workout-sessions/{id}/sets/add(id=${session.id})}"
+                <form th:action="@{/workout-sessions/{id}/sets/add-new(id=${sessionId})}"
                       method="post">
                     <input type="hidden" name="exerciseName"
                            th:value="${exerciseGroup.key}">
@@ -65,25 +50,24 @@
                 </form>
             </td>
         </tr>
+        </tbody>
     </table>
 </div>
 
 
 
 
-<h2>Session Summary</h2>
-
-<div id="summary">
-    Loading...
-</div>
-
 <script th:inline="javascript">
 /* ===============================
    Server-injected values
    =============================== */
 
-const sessionId = document.getElementById("sessionId").value;
+const sessionId = document.getElementById("sessionId")?.value;
 const workoutStartTime = new Date([[${startTimeMillis}]]);
+
+if (!sessionId) {
+    console.error("Session ID not found in DOM");
+}
 
 if (isNaN(workoutStartTime.getTime())) {
     console.error("Invalid workoutStartTime injected from server");
@@ -101,9 +85,13 @@ function pad(n) {
    TOTAL WORKOUT TIMER
    =============================== */
 
-function updateWorkoutTimer() {
-    const elapsedMs = new Date() - workoutStartTime;
+let workoutTimerInterval = null;
 
+function updateWorkoutTimer() {
+    const timerEl = document.getElementById("workoutTimer");
+    if (!timerEl) return;
+
+    const elapsedMs = Date.now() - workoutStartTime.getTime();
     if (isNaN(elapsedMs)) return;
 
     const totalSeconds = Math.floor(elapsedMs / 1000);
@@ -111,8 +99,13 @@ function updateWorkoutTimer() {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    document.getElementById("workoutTimer").innerText =
-        `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    timerEl.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
+function startWorkoutTimer() {
+    if (workoutTimerInterval) return;
+    updateWorkoutTimer();
+    workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
 }
 
 /* ===============================
@@ -127,12 +120,14 @@ function startRestTimer() {
     restSeconds = 0;
 
     restInterval = setInterval(() => {
+        const restEl = document.getElementById("restTimer");
+        if (!restEl) return;
+
         restSeconds++;
         const minutes = Math.floor(restSeconds / 60);
         const seconds = restSeconds % 60;
 
-        document.getElementById("restTimer").innerText =
-            `${pad(minutes)}:${pad(seconds)}`;
+        restEl.innerText = `${pad(minutes)}:${pad(seconds)}`;
     }, 1000);
 }
 
@@ -150,9 +145,11 @@ function stopRestTimer() {
 let summaryPoller = null;
 
 function addSet() {
-    const exerciseName = document.getElementById("exerciseName").value;
-    const reps = parseInt(document.getElementById("reps").value, 10);
-    const weight = parseFloat(document.getElementById("weight").value);
+    const exerciseName = document.getElementById("exerciseName")?.value;
+    const reps = parseInt(document.getElementById("reps")?.value, 10);
+    const weight = parseFloat(document.getElementById("weight")?.value);
+
+    if (!exerciseName) return;
 
     fetch(`/api/workout-sessions/${sessionId}/sets`, {
         method: "POST",
@@ -169,7 +166,7 @@ function loadSummary() {
         .then(response => {
             if (response.status === 404) {
                 alert("This workout session no longer exists.");
-                clearInterval(summaryPoller);
+                if (summaryPoller) clearInterval(summaryPoller);
                 return null;
             }
             return response.json();
@@ -180,6 +177,9 @@ function loadSummary() {
 }
 
 function renderSummary(summary) {
+    const summaryEl = document.getElementById("summary");
+    if (!summaryEl) return;
+
     let html = `
         <p>Status: ${summary.status}</p>
         <p>Total Sets: ${summary.totalSets}</p>
@@ -192,7 +192,7 @@ function renderSummary(summary) {
     }
 
     html += "</ul>";
-    document.getElementById("summary").innerHTML = html;
+    summaryEl.innerHTML = html;
 }
 
 /* ===============================
@@ -210,8 +210,9 @@ function endWorkout() {
             throw new Error("Failed to end workout");
         }
 
-        clearInterval(workoutTimerInterval);
+        if (workoutTimerInterval) clearInterval(workoutTimerInterval);
         if (restInterval) clearInterval(restInterval);
+        if (summaryPoller) clearInterval(summaryPoller);
 
         window.location.href = `/workout-sessions/${sessionId}/summary`;
     })
@@ -225,13 +226,12 @@ function endWorkout() {
    START EVERYTHING
    =============================== */
 
-updateWorkoutTimer();
-const workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
-
+startWorkoutTimer();
 loadSummary();
 summaryPoller = setInterval(loadSummary, 3000);
 
 </script>
+
 
 
 <button onclick="endWorkout()">End Workout</button>

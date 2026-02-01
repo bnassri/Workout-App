@@ -36,13 +36,19 @@ public class WorkoutTemplate {
     )
     private List<WorkoutTemplateExercise> exercises = new ArrayList<>();
 
-    protected WorkoutTemplate() {
+    public WorkoutTemplate() {
         // JPA only
     }
 
     public WorkoutTemplate(String name) {
-        this.id = UUID.randomUUID();
         this.name = name;
+    }
+
+    @PrePersist
+    private void ensureId() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
     }
 
     // ------------------
@@ -75,6 +81,7 @@ public class WorkoutTemplate {
      * Keeps both sides of the relationship in sync
      */
     public void addExercise(String exerciseName) {
+
         exercises.add(new WorkoutTemplateExercise(this, exerciseName));
     }
 }

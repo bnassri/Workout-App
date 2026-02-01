@@ -6,6 +6,7 @@ import com.example.workoutlogger.dto.AddWorkoutSetRequest;
 import com.example.workoutlogger.dto.WorkoutSessionSummaryDto;
 import com.example.workoutlogger.service.WorkoutSessionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;

@@ -63,6 +63,7 @@ public class WorkoutSessionPageController {
         return "redirect:/workout-sessions/" + session.getId();
     }
 
+
     /**
      * Renders the workout session page
      */
@@ -91,11 +92,15 @@ public class WorkoutSessionPageController {
             }
         }
 
+
         // Group sets by exercise name
         Map<String, List<WorkoutSet>> setsByExercise = new LinkedHashMap<>();
         for (WorkoutSet set : session.getSets()) {
             setsByExercise.computeIfAbsent(set.getExerciseName(), k -> new ArrayList<>())
                     .add(set);
+        }
+        if (setsByExercise.isEmpty()) {
+            model.addAttribute("setsByExercise", Collections.emptyMap());
         }
 
         model.addAttribute("session", session);
@@ -106,10 +111,31 @@ public class WorkoutSessionPageController {
         return "workout-session";
     }
 
-    @PostMapping("/{id}/sets/add")
+
+    @PostMapping("/{id}/sets/{setId}")
+    public String saveSet(
+            @PathVariable UUID id,
+            @PathVariable UUID setId,
+            @RequestParam int reps,
+            @RequestParam double weight
+    ) {
+        WorkoutSession session = workoutSessionService.getSession(id);
+
+        WorkoutSet set = session.getSets().stream()
+                .filter(s -> s.getId().equals(setId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Set not found"));
+
+        set.setReps(reps);
+        set.setWeight(weight);
+        workoutSessionService.saveSet(set);
+
+        return "redirect:/workout-sessions/" + id;
+    }
+    @PostMapping("/{id}/sets/add-new")
     public String addSet(
             @PathVariable UUID id,
-            @RequestParam String exerciseName
+            @RequestParam("exerciseName") String exerciseName
     ) {
         AddWorkoutSetRequest request = new AddWorkoutSetRequest();
         request.setExerciseName(exerciseName);
@@ -120,5 +146,7 @@ public class WorkoutSessionPageController {
 
         return "redirect:/workout-sessions/" + id;
     }
+
+
 
 }

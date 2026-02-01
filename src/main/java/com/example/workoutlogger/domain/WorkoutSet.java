@@ -60,4 +60,14 @@ public class WorkoutSet {
     public int getReps() { return reps; }
     public double getWeight() { return weight; }
     public Instant getCreatedAt() { return createdAt; }
+
+    // Setters
+    public void setReps(int reps) {
+        this.reps = reps;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
 }
