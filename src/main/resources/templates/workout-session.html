@@ -2,61 +2,117 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Workout Logger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Workout in Progress</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* override timer colour to pulse gently */
+        @keyframes pulse-glow {
+            0%, 100% { text-shadow: 0 0 8px rgba(232,69,69,.4); }
+            50%      { text-shadow: 0 0 18px rgba(232,69,69,.7); }
+        }
+        .timer { animation: pulse-glow 2s ease-in-out infinite; }
+
+        /* sticky end-workout bar at bottom on mobile */
+        .end-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: .75rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        /* input number — hide spinners */
+        .input[type=number]::-webkit-inner-spin-button,
+        .input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .input[type=number] { -moz-appearance: textfield; }
+    </style>
 </head>
 <body>
 
-<h2 id="workoutTimer">00:00:00</h2>
-<h1>Workout Logger</h1>
+<nav class="nav">
+    <span class="nav__logo">⚡ Workout Logger</span>
+    <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/templates">Templates</a>
+        <a href="/workout-history">History</a>
+    </div>
+</nav>
 
+<!-- hidden session id for JS -->
 <input type="hidden" id="sessionId" th:value="${sessionId}">
 
-<h2>Add Sets</h2>
+<div class="page" style="padding-bottom:5rem;">  <!-- extra bottom pad for sticky bar -->
 
-<div th:each="exerciseGroup : ${setsByExercise}">
-    <h3 th:text="${exerciseGroup.key}">Exercise Name</h3>
+    <!-- Timer -->
+    <div style="text-align:center; margin-bottom:1.5rem;">
+        <div class="timer" id="workoutTimer">00:00:00</div>
+        <div class="timer timer--small" id="restTimer" style="display:none;">Rest: 00:00</div>
+    </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>Reps</th>
-            <th>Weight</th>
-            <th>Save</th>
-        </tr>
-        </thead>
+    <!-- live summary (updated by poller) -->
+    <div id="summary" style="margin-bottom:1.5rem;"></div>
 
-        <tbody>
-        <tr th:each="set : ${exerciseGroup.value}">
-            <td colspan="3">
+    <!-- Exercise set blocks (server-rendered) -->
+    <div th:each="exerciseGroup : ${setsByExercise}" class="set-block">
+        <div class="set-block__header">
+            <span th:text="${exerciseGroup.key}">Exercise Name</span>
+        </div>
+
+        <div class="card" style="padding:0;">
+            <!-- existing sets -->
+            <div th:each="set : ${exerciseGroup.value}" class="set-row" style="padding:.6rem .85rem;">
                 <form th:action="@{/workout-sessions/{id}/sets/{setId}(id=${sessionId}, setId=${set.id})}"
                       method="post"
-                      style="display:flex; gap:12px">
+                      style="display:flex; align-items:center; gap:.6rem; width:100%;">
 
-                    <input type="number" name="reps" th:value="${set.reps}">
-                    <input type="number" name="weight" th:value="${set.weight}">
-                    <button type="submit">Save</button>
+                    <label style="width:28px; font-size:.78rem; color:var(--text-dim); font-weight:600; margin:0;">Set</label>
 
+                    <div style="flex:1; display:flex; gap:.5rem; align-items:center;">
+                        <div style="flex:1;">
+                            <label style="font-size:.7rem; margin-bottom:.15rem;">Reps</label>
+                            <input type="number" name="reps" th:value="${set.reps}" class="input" style="width:100%; text-align:center;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:.7rem; margin-bottom:.15rem;">Weight</label>
+                            <input type="number" name="weight" th:value="${set.weight}" class="input" style="width:100%; text-align:center;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn--secondary" style="padding:.5rem .75rem; flex-shrink:0;">Save</button>
                 </form>
-            </td>
-        </tr>
+            </div>
 
-        <tr>
-            <td colspan="3">
+            <!-- add set row -->
+            <div style="padding:.5rem .85rem; border-top:1px solid var(--border);">
                 <form th:action="@{/workout-sessions/{id}/sets/add-new(id=${sessionId})}"
                       method="post">
-                    <input type="hidden" name="exerciseName"
-                           th:value="${exerciseGroup.key}">
-                    <button type="submit">+ Add Set</button>
+                    <input type="hidden" name="exerciseName" th:value="${exerciseGroup.key}">
+                    <button type="submit" class="btn btn--ghost btn--block" style="padding:.45rem;">+ Add Set</button>
                 </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- empty state if no exercises -->
+    <div th:if="${setsByExercise.isEmpty()}" class="empty">
+        <div class="empty__icon">🏋️</div>
+        <p>No exercises loaded. This is an ad-hoc workout — sets will appear here as you add them via the API.</p>
+    </div>
+
 </div>
 
+<!-- sticky End Workout bar -->
+<div class="end-bar">
+    <button class="btn btn--danger" onclick="endWorkout()" style="font-size:1rem; padding:.7rem 2rem;">⏹ End Workout</button>
+</div>
 
-
-
+<!-- ============================================================
+     ALL EXISTING JS — untouched logic, same functions & contract
+     ============================================================ -->
 <script th:inline="javascript">
 /* ===============================
    Server-injected values
@@ -118,6 +174,7 @@ let restInterval = null;
 function startRestTimer() {
     stopRestTimer();
     restSeconds = 0;
+    document.getElementById("restTimer").style.display = "block";
 
     restInterval = setInterval(() => {
         const restEl = document.getElementById("restTimer");
@@ -127,7 +184,7 @@ function startRestTimer() {
         const minutes = Math.floor(restSeconds / 60);
         const seconds = restSeconds % 60;
 
-        restEl.innerText = `${pad(minutes)}:${pad(seconds)}`;
+        restEl.innerText = `Rest: ${pad(minutes)}:${pad(seconds)}`;
     }, 1000);
 }
 
@@ -180,18 +237,26 @@ function renderSummary(summary) {
     const summaryEl = document.getElementById("summary");
     if (!summaryEl) return;
 
-    let html = `
-        <p>Status: ${summary.status}</p>
-        <p>Total Sets: ${summary.totalSets}</p>
-        <p>Total Volume: ${summary.totalVolume}</p>
-        <ul>
-    `;
+    // Build a nice live stats bar
+    let html = `<div class="stats">
+        <div class="stat">
+            <div class="stat__label">Sets</div>
+            <div class="stat__value">${summary.totalSets}</div>
+        </div>
+        <div class="stat">
+            <div class="stat__label">Volume</div>
+            <div class="stat__value">${summary.totalVolume.toLocaleString()}</div>
+            <div class="stat__unit">lbs</div>
+        </div>`;
 
-    for (const ex of summary.exercises) {
-        html += `<li>${ex.name}: ${ex.sets} sets, volume ${ex.volume}</li>`;
+    if (summary.exercises && summary.exercises.length > 0) {
+        html += `<div class="stat">
+            <div class="stat__label">Exercises</div>
+            <div class="stat__value">${summary.exercises.length}</div>
+        </div>`;
     }
 
-    html += "</ul>";
+    html += '</div>';
     summaryEl.innerHTML = html;
 }
 
@@ -229,12 +294,7 @@ function endWorkout() {
 startWorkoutTimer();
 loadSummary();
 summaryPoller = setInterval(loadSummary, 3000);
-
 </script>
-
-
-
-<button onclick="endWorkout()">End Workout</button>
 
 </body>
 </html>

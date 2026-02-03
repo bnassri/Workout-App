@@ -1,35 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Workout Templates</title>
-    <link rel="stylesheet" th:href="@{/static.css.style.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Templates</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<h1>Workout Templates</h1>
+<nav class="nav">
+    <span class="nav__logo">⚡ Workout Logger</span>
+    <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/templates" class="active">Templates</a>
+        <a href="/workout-history">History</a>
+    </div>
+</nav>
 
-<div th:if="${templates.isEmpty()}">
-    <p>No templates created yet.</p>
-</div>
+<div class="page">
 
-<ul class="template-list" th:if="${!templates.isEmpty()}">
-    <li th:each="template : ${templates}">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
         <div>
-            <strong th:text="${template.name}"></strong>
-            <a th:href="@{/templates/edit/{id}(id=${template.id})}">
-                <button>Edit</button>
-            </a>
+            <h1>Templates</h1>
+            <p>Saved workout blueprints.</p>
         </div>
-        <!-- Show exercises under each template -->
-        <ul>
-            <li th:each="exercise : ${template.exercises}" th:text="${exercise.exerciseName}"></li>
-        </ul>
-    </li>
-</ul>
+        <a href="/templates/create" class="btn btn--primary">+ New</a>
+    </div>
 
-<div class="button-row">
-    <a href="/templates/create"><button>Create New Template</button></a>
-    <a href="/"><button>Back to Home</button></a>
+    <!-- Empty state -->
+    <div th:if="${templates.isEmpty()}" class="empty">
+        <div class="empty__icon">📋</div>
+        <p>No templates yet. Create one to save your favourite workout.</p>
+        <a href="/templates/create" class="btn btn--primary" style="margin-top:1rem;">Create Template</a>
+    </div>
+
+    <!-- Template cards -->
+    <div th:if="${!templates.isEmpty()}">
+        <div th:each="template : ${templates}" class="card" style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div style="flex:1;">
+                <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem;">
+                    <strong th:text="${template.name}" style="font-size:1.05rem;"></strong>
+                    <span class="badge badge--green" th:text="${template.exercises.size() + ' exercises'}">0 exercises</span>
+                </div>
+                <div>
+                    <span th:each="ex : ${template.exercises}" class="pill" th:text="${ex.exerciseName}">Exercise</span>
+                </div>
+            </div>
+            <a th:href="@{/templates/edit/{id}(id=${template.id})}" class="btn btn--ghost" style="flex-shrink:0;">Edit</a>
+        </div>
+    </div>
+
 </div>
 
 </body>

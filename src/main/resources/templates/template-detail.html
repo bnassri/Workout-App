@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${template.name}">Template</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="nav">
+    <span class="nav__logo">⚡ Workout Logger</span>
+    <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/templates" class="active">Templates</a>
+        <a href="/workout-history">History</a>
+    </div>
+</nav>
+
+<div class="page">
+
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <div>
+            <h1 th:text="${template.name}">Template Name</h1>
+            <p th:text="${template.exercises.size() + ' exercises'}" style="color:var(--text-dim);"></p>
+        </div>
+        <a th:href="@{/templates/edit/{id}(id=${template.id})}" class="btn btn--ghost">Edit</a>
+    </div>
+
+    <div class="card">
+        <h3 style="font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:.75rem;">Exercises</h3>
+
+        <div th:if="${!template.exercises.isEmpty()}">
+            <div th:each="ex,idx : ${template.exercises}" style="display:flex; align-items:center; padding:.55rem 0; border-bottom:1px solid var(--border);">
+                <span style="color:var(--text-dim); font-size:.8rem; width:24px; font-weight:700;" th:text="${idx.index + 1}">1</span>
+                <span th:text="${ex.exerciseName}" style="font-size:.95rem;"></span>
+            </div>
+        </div>
+
+        <div th:if="${template.exercises.isEmpty()}" style="color:var(--text-dim); font-size:.9rem; padding:.5rem 0;">
+            No exercises added yet. <a th:href="@{/templates/edit/{id}(id=${template.id})}" style="color:var(--accent-hi);">Add some →</a>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="btn-row">
+        <form action="/workout-sessions/start" method="post" style="display:inline;">
+            <input type="hidden" name="templateId" th:value="${template.id}">
+            <button type="submit" class="btn btn--primary">⚡ Start Workout</button>
+        </form>
+        <a href="/templates" class="btn btn--ghost">← Back</a>
+    </div>
+
+</div>
+
+</body>
+</html>

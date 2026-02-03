@@ -1,7 +1,6 @@
 package com.example.workoutlogger.controller;
 
 import com.example.workoutlogger.domain.WorkoutSession;
-import com.example.workoutlogger.dto.WorkoutComparisonDto;
 import com.example.workoutlogger.dto.WorkoutSummaryView;
 import com.example.workoutlogger.service.WorkoutSessionService;
 import org.springframework.stereotype.Controller;
@@ -27,15 +26,6 @@ public class WorkoutSummaryPageController {
         WorkoutSummaryView summary = service.getWorkoutSummaryView(id);
 
         model.addAttribute("summary", summary);
-
-// Try to get comparison
-        try {
-            WorkoutComparisonDto comparison = service.compareToPrevious(id);
-            model.addAttribute("comparison", comparison);
-            model.addAttribute("hasComparison", true);
-        } catch (Exception e) {
-            model.addAttribute("hasComparison", false);
-        }
 
         return "workout-summary";
     }

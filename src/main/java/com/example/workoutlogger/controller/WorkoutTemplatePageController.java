@@ -71,7 +71,7 @@ public class WorkoutTemplatePageController {
 
         return "edit-template"; // <-- template-edit.html
     }
-    @PostMapping("/create")
+    @PostMapping("/templates/create")
     public String createTemplate(
             @RequestParam String name
     ) {

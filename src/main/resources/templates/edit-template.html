@@ -1,48 +1,132 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit Template</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        input { padding: 0.25rem; margin-bottom: 0.5rem; }
-        .exercise-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .pill--removable { cursor: pointer; position: relative; padding-right: 1.4rem; }
+        .pill--removable .remove {
+            position: absolute; right: .45rem; top: 50%;
+            transform: translateY(-50%);
+            font-size: .75rem; color: var(--text-dim); line-height: 1;
+        }
+        .pill--removable:hover { border-color: var(--accent); }
+        .pill--removable:hover .remove { color: var(--accent-hi); }
     </style>
 </head>
 <body>
 
-<h1>Edit Workout Template</h1>
+<nav class="nav">
+    <span class="nav__logo">⚡ Workout Logger</span>
+    <div class="nav__links">
+        <a href="/">Home</a>
+        <a href="/templates" class="active">Templates</a>
+        <a href="/workout-history">History</a>
+    </div>
+</nav>
 
-<form th:action="@{/templates/edit/{id}(id=${template.id})}" method="post">
+<div class="page">
 
-    <!-- Template name -->
-    <label>
-        Template Name:
-        <input type="text" name="name" th:value="${template.name}" required>
-    </label>
-
-    <h3>Exercises</h3>
-
-    <!-- Existing exercises -->
-    <div th:each="exercise : ${template.exercises}" class="exercise-row">
-        <input type="text"
-               name="exerciseNames"
-               th:value="${exercise.exerciseName}">
+    <div class="page-header">
+        <h1>Edit Template</h1>
+        <p>Update the name or change the exercises.</p>
     </div>
 
-    <!-- Empty input to allow adding new exercises -->
-    <div class="exercise-row">
-        <input type="text" name="exerciseNames" placeholder="Add new exercise">
-    </div>
+    <div th:if="${error}" class="error-banner" th:text="${error}"></div>
 
-    <button type="submit">Save Changes</button>
-</form>
+    <form th:action="@{/templates/edit/{id}(id=${template.id})}" method="post" id="edit-form" class="card">
 
-<br>
+        <div class="form-group">
+            <label for="name">Template name</label>
+            <input type="text" id="name" name="name" class="input" th:value="${template.name}" required>
+        </div>
 
-<a href="/templates">
-    <button>Back to Templates</button>
-</a>
+        <div class="form-group">
+            <label>Exercises</label>
+            <div id="exerciseList" style="margin-bottom:.6rem; min-height:1.8rem;"></div>
+
+            <div class="input-row">
+                <input type="text" id="exerciseInput" class="input" placeholder="Add exercise…">
+                <button type="button" id="addExercise" class="btn btn--secondary">+ Add</button>
+            </div>
+        </div>
+
+        <!--
+            The controller expects multiple <input name="exerciseNames"> values.
+            We render one hidden input per exercise, kept in sync by JS.
+        -->
+        <div id="hiddenExercises"></div>
+
+        <div class="btn-row" style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn--primary">Save Changes</button>
+            <a href="/templates" class="btn btn--ghost">Cancel</a>
+        </div>
+    </form>
+
+</div>
+
+<script th:inline="javascript">
+(function () {
+    // Seed from server-rendered exercise list
+    var serverExercises = [[${template.exercises}]];
+    var exercises = [];
+    serverExercises.forEach(function (ex) {
+        exercises.push(ex.exerciseName);
+    });
+
+    var exerciseInput  = document.getElementById('exerciseInput');
+    var addButton      = document.getElementById('addExercise');
+    var listEl         = document.getElementById('exerciseList');
+    var hiddenContainer = document.getElementById('hiddenExercises');
+
+    function syncHiddens() {
+        hiddenContainer.innerHTML = '';
+        exercises.forEach(function (name) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'exerciseNames';
+            inp.value = name;
+            hiddenContainer.appendChild(inp);
+        });
+    }
+
+    function renderPills() {
+        listEl.innerHTML = '';
+        exercises.forEach(function (name, i) {
+            var pill = document.createElement('span');
+            pill.className = 'pill pill--removable';
+            pill.innerHTML = name + '<span class="remove">✕</span>';
+            pill.querySelector('.remove').onclick = function () {
+                exercises.splice(i, 1);
+                syncHiddens();
+                renderPills();
+            };
+            listEl.appendChild(pill);
+        });
+    }
+
+    function add(name) {
+        name = name.trim();
+        if (!name) return;
+        exercises.push(name);
+        syncHiddens();
+        renderPills();
+        exerciseInput.value = '';
+        exerciseInput.focus();
+    }
+
+    addButton.addEventListener('click', function () { add(exerciseInput.value); });
+    exerciseInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') { e.preventDefault(); add(exerciseInput.value); } });
+
+    document.getElementById('edit-form').addEventListener('submit', function () { syncHiddens(); });
+
+    // Initial render
+    syncHiddens();
+    renderPills();
+})();
+</script>
 
 </body>
 </html>
-

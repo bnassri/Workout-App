@@ -2,34 +2,64 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Workout Logger</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 
-<h1>Workout Logger</h1>
+<nav class="nav">
+    <span class="nav__logo">⚡ Workout Logger</span>
+    <div class="nav__links">
+        <a href="/" class="active">Home</a>
+        <a href="/templates">Templates</a>
+        <a href="/workout-history">History</a>
+    </div>
+</nav>
 
-<!-- Button Container -->
-<div class="button-row">
-    <a href="/templates"><button>Manage Workout Templates</button></a>
-    <a href="/templates"><button>View Workout Templates</button></a>
-    <a href="/templates/create"><button>Create New Template</button></a>
-    <form action="/workout-sessions/start" method="post">
-        <select name="templateId">
-            <option th:each="template : ${templates}"
-                    th:value="${template.id}"
-                    th:text="${template.name}">
-            </option>
-        </select>
-        <button type="submit">Start Workout</button>
-    </form>
+<div class="page">
 
-    <form action="/workout-sessions/start" method="post">
-        <button type="submit">Start Ad-Hoc Workout</button>
-    </form>
+    <div class="page-header">
+        <h1>Welcome back</h1>
+        <p>Pick a template or jump straight in.</p>
+    </div>
 
+    <!-- Start with template -->
+    <div class="card card--accent">
+        <h2 style="font-size:1.1rem; margin-bottom:.75rem; font-weight:700;">Start from a template</h2>
+        <form action="/workout-sessions/start" method="post">
+            <div class="form-group">
+                <label for="templateId">Choose template</label>
+                <select name="templateId" id="templateId" class="input">
+                    <option value="" disabled th:if="${templates.isEmpty()}" selected>No templates yet</option>
+                    <option th:each="t : ${templates}"
+                            th:value="${t.id}"
+                            th:text="${t.name}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block" th:if="${!templates.isEmpty()}">Start Workout</button>
+        </form>
+        <div th:if="${templates.isEmpty()}" style="margin-top:.75rem;">
+            <a href="/templates/create" class="btn btn--secondary">+ Create your first template</a>
+        </div>
+    </div>
 
-    <a href="/workout-history"><button>Workout History</button></a>
+    <!-- Ad-hoc -->
+    <div class="card" style="margin-top:.75rem;">
+        <h2 style="font-size:1.05rem; margin-bottom:.4rem; font-weight:700;">Ad-hoc workout</h2>
+        <p style="color:var(--text-dim); font-size:.88rem; margin-bottom:.75rem;">No template — just log as you go.</p>
+        <form action="/workout-sessions/start" method="post">
+            <button type="submit" class="btn btn--secondary btn--block">Start Ad-Hoc Workout</button>
+        </form>
+    </div>
+
+    <!-- Quick nav -->
+    <div class="btn-row" style="margin-top:1.75rem;">
+        <a href="/templates" class="btn btn--ghost">📋 Manage Templates</a>
+        <a href="/workout-history" class="btn btn--ghost">📊 View History</a>
+    </div>
+
 </div>
 
 </body>

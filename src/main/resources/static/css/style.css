@@ -1,34 +1,400 @@
-/* Container for buttons with spacing */
-.button-row {
+/* ================================================
+   WORKOUT LOGGER — Global Stylesheet
+   Dark gym aesthetic. High contrast. Bold type.
+   ================================================ */
+
+/* ---------- reset & base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:        #0f1117;
+    --surface:   #1a1d27;
+    --surface2:  #23273a;
+    --border:    #2e3348;
+    --text:      #e8eaf0;
+    --text-dim:  #7b82a0;
+    --accent:    #e84545;          /* primary action */
+    --accent-hi: #ff6b6b;          /* hover / highlight */
+    --green:     #3ecf8e;
+    --green-dim: rgba(62,207,142,.15);
+    --red:       #e84545;
+    --red-dim:   rgba(232,69,69,.15);
+    --amber:     #f5a623;
+    --amber-dim: rgba(245,166,35,.15);
+    --radius:    10px;
+    --radius-sm: 6px;
+}
+
+html { font-size: 16px; }
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ---------- layout shell ---------- */
+.page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+.page--wide { max-width: 960px; }
+
+/* ---------- header / title ---------- */
+.page-header {
+    margin-bottom: 2rem;
+}
+.page-header h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+.page-header p {
+    color: var(--text-dim);
+    margin-top: .4rem;
+    font-size: .95rem;
+}
+
+/* ---------- nav bar (top strip) ---------- */
+.nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: .75rem 1.5rem;
     display: flex;
-    gap: 1rem;          /* space between buttons */
-    flex-wrap: wrap;    /* wrap to next line if needed */
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+.nav__logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent-hi);
+    letter-spacing: -0.3px;
+}
+.nav__links { display: flex; gap: 1rem; flex-wrap: wrap; }
+.nav__links a {
+    color: var(--text-dim);
+    font-size: .9rem;
+    transition: color .2s;
+}
+.nav__links a:hover,
+.nav__links a.active { color: var(--text); }
+
+/* ---------- cards ---------- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
     margin-bottom: 1rem;
 }
-
-/* Remove default form margins */
-.button-row form {
-    margin: 0;
+.card--accent {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--surface) 60%, rgba(232,69,69,.07));
 }
 
-/* Style all buttons consistently */
-.button-row button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
+/* ---------- stat row (small horizontal stats) ---------- */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+.stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem .85rem;
+    text-align: center;
+}
+.stat__label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--text-dim);
+    margin-bottom: .3rem;
+}
+.stat__value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.stat__unit {
+    font-size: .75rem;
+    color: var(--text-dim);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .6rem 1.3rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn:active { transform: scale(.96); }
+
+.btn--primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn--primary:hover { background: var(--accent-hi); }
+
+.btn--secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.btn--secondary:hover { background: var(--border); }
+
+.btn--ghost {
+    background: transparent;
+    color: var(--text-dim);
+    padding: .5rem .8rem;
+}
+.btn--ghost:hover { color: var(--text); }
+
+.btn--danger {
+    background: var(--red-dim);
+    color: var(--accent-hi);
+    border: 1px solid var(--red);
+}
+.btn--danger:hover { background: var(--red); color: #fff; }
+
+.btn--green {
+    background: var(--green);
+    color: #0f1117;
+}
+.btn--green:hover { background: #4ee8a2; }
+
+.btn--block { width: 100%; }
+
+/* ---------- button row ---------- */
+.btn-row {
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+/* ---------- inputs ---------- */
+.input {
+    width: 100%;
+    padding: .6rem .85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: .95rem;
+    transition: border-color .2s;
+}
+.input:focus { outline: none; border-color: var(--accent-hi); }
+.input::placeholder { color: var(--text-dim); }
+
+.input-row {
+    display: flex;
+    gap: .6rem;
+    align-items: flex-end;
+}
+.input-row .input { flex: 1; }
+
+label {
+    display: block;
+    font-size: .82rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: .35rem;
+}
+
+.form-group { margin-bottom: 1.1rem; }
+
+/* ---------- select ---------- */
+select.input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237b82a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 2rem;
     cursor: pointer;
 }
 
-/* Workout template list styling */
-.template-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+/* ---------- table ---------- */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+.table th {
+    text-align: left;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--text-dim);
+    padding: .6rem .85rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+}
+.table td {
+    padding: .75rem .85rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr { transition: background .15s; }
+.table tbody tr:hover { background: var(--surface2); }
+
+/* ---------- badge / tag ---------- */
+.badge {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: .2rem .55rem;
+    border-radius: 20px;
+}
+.badge--green  { background: var(--green-dim); color: var(--green); }
+.badge--red    { background: var(--red-dim);   color: var(--red);   }
+.badge--amber  { background: var(--amber-dim); color: var(--amber); }
+
+/* ---------- delta helper ---------- */
+.delta { font-weight: 700; }
+.delta--up   { color: var(--green); }
+.delta--down { color: var(--red); }
+.delta--zero { color: var(--text-dim); }
+
+/* ---------- empty state ---------- */
+.empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-dim);
+}
+.empty__icon { font-size: 2.5rem; margin-bottom: .5rem; }
+.empty p { font-size: .95rem; max-width: 320px; margin: 0 auto; }
+
+/* ---------- error banner ---------- */
+.error-banner {
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-sm);
+    padding: .7rem 1rem;
+    margin-bottom: 1rem;
+    color: var(--accent-hi);
+    font-size: .9rem;
 }
 
-.template-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #ccc;
+/* ---------- exercise pill (in template cards) ---------- */
+.pill {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .22rem .7rem;
+    font-size: .82rem;
+    color: var(--text-dim);
+    margin: .15rem .1rem;
 }
+
+/* ---------- timer (big centered clock) ---------- */
+.timer {
+    font-size: 2.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+    text-align: center;
+    color: var(--accent-hi);
+    margin: 1rem 0 .5rem;
+}
+.timer--small { font-size: 1.4rem; color: var(--text-dim); margin: 0; }
+
+/* ---------- exercise set rows (workout in progress) ---------- */
+.set-block { margin-bottom: 1.5rem; }
+.set-block__header {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: .6rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.set-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .45rem 0;
+    border-bottom: 1px solid var(--border);
+}
+.set-row:last-of-type { border-bottom: none; }
+.set-row .input { width: 80px; flex: none; text-align: center; }
+.set-row .set-label {
+    width: 28px;
+    font-size: .78rem;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+/* ---------- comparison box (summary page) ---------- */
+.compare {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 1.5rem 0;
+}
+.compare__header {
+    background: linear-gradient(135deg, #1e2236, #2a1f2e);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.compare__totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    margin-bottom: 0;
+}
+.compare__totals > div {
+    background: var(--surface);
+    padding: 1rem;
+    text-align: center;
+}
+.compare__totals .label  { font-size: .73rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-dim); margin-bottom: .25rem; }
+.compare__totals .value  { font-size: 1.5rem; font-weight: 700; }
+.compare__totals .unit   { font-size: .72rem; color: var(--text-dim); }
+
+.compare__exercises { padding: 1rem 1.5rem; }
+.compare__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--border);
+}
+.compare__row:last-child { border-bottom: none; }
+.compare__row__name { font-weight: 600; flex: 1; }
+.compare__row__nums { display: flex; gap: 1.5rem; align-items: center; }
+.compare__row__nums .vol { text-align: center; }
+.compare__row__nums .vol .label { font-size: .7rem; color: var(--text-dim); }
+.compare__row__nums .vol .value { font-weight: 700; font-size: 1rem; }
