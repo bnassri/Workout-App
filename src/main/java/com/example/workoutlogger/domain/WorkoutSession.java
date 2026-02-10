@@ -8,8 +8,6 @@ import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-
-
 @Entity
 @Table(name = "workout_session")
 public class WorkoutSession {
@@ -25,10 +23,6 @@ public class WorkoutSession {
     )
     private List<WorkoutSet> sets = new ArrayList<>();
 
-    /**
-     * Every workout session can optionally belong to a template
-     * (e.g. Chest, Arms, Legs).
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id")
     private WorkoutTemplate template;
@@ -49,6 +43,9 @@ public class WorkoutSession {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
 
     /* ===============================
        Constructors
@@ -103,5 +100,13 @@ public class WorkoutSession {
 
     public void setTemplate(WorkoutTemplate template) {
         this.template = template;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

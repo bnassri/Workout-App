@@ -104,17 +104,34 @@
     </div>
 
     <!-- ========== Exercise breakdown ========== -->
+    <!-- ========== Exercise breakdown ========== -->
     <div class="card">
         <h3 style="font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:.85rem;">Exercises</h3>
 
         <div th:if="${!summary.exercises.isEmpty()}">
-            <div th:each="ex : ${summary.exercises}"
-                 style="display:flex; justify-content:space-between; align-items:center; padding:.6rem 0; border-bottom:1px solid var(--border);">
-                <span style="font-weight:600;" th:text="${ex.name}">Name</span>
-                <span style="color:var(--text-dim); font-size:.88rem;">
+            <div th:each="ex : ${summary.exercises}" style="margin-bottom:1.5rem;">
+                <!-- Exercise name + total -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; padding-bottom:.4rem; border-bottom:1px solid var(--border);">
+                    <span style="font-weight:700; font-size:1rem;" th:text="${ex.name}">Exercise</span>
+                    <span style="color:var(--text-dim); font-size:.85rem;">
                     <span th:text="${ex.sets}">0</span> sets ·
-                    <span th:text="${#numbers.formatDecimal(ex.volume, 0, 0)}">0</span> lbs
+                    <span th:text="${#numbers.formatDecimal(ex.volume, 0, 0)}">0</span> lbs total
                 </span>
+                </div>
+
+                <!-- Individual sets -->
+                <div th:if="${summary.setsByExercise.containsKey(ex.name)}">
+                    <div th:each="set,iterStat : ${summary.setsByExercise.get(ex.name)}"
+                         style="display:flex; justify-content:space-between; padding:.35rem .5rem; font-size:.88rem;">
+                    <span style="color:var(--text-dim);">
+                        Set <span th:text="${iterStat.index + 1}">1</span>
+                    </span>
+                        <span>
+                        <span th:text="${set.reps}" style="font-weight:600;">0</span> reps ×
+                        <span th:text="${set.weight}" style="font-weight:600;">0</span> lbs
+                    </span>
+                    </div>
+                </div>
             </div>
         </div>
 

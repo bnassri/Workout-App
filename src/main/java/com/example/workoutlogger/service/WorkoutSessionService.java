@@ -215,7 +215,9 @@ public class WorkoutSessionService {
                 durationSeconds,
                 totalSets,
                 totalVolume,
-                exercises
+                exercises,
+                session.getNotes(),
+                byExercise  // This variable already exists in the method
         );
     }
 
