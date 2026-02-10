@@ -78,7 +78,7 @@
                         </div>
                         <div style="flex:1;">
                             <label style="font-size:.7rem; margin-bottom:.15rem;">Weight</label>
-                            <input type="number" name="weight" th:value="${set.weight}" class="input" style="width:100%; text-align:center;">
+                            <input type="number" name="weight" th:value="${set.weight}" class="input" style="width:100%; text-align:center;" step="0.5">
                         </div>
                     </div>
 
@@ -295,18 +295,24 @@ function endWorkout() {
 
 document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', function (e) {
-        e.preventDefault();                          // stop the normal full-page POST
-
-        const scrollY = window.scrollY;              // remember where we are
+        e.preventDefault();
 
         fetch(form.action, {
             method: 'POST',
-            body: new FormData(form)                 // sends exactly the same fields
+            body: new FormData(form)
         })
         .then(() => {
-            // stash scroll position — survives the reload
-            sessionStorage.setItem('scrollY', scrollY);
-            window.location.reload();
+            // Check if this is the "Add Set" button (has hidden exerciseName field but no reps field)
+            const isAddSetForm = form.querySelector('input[name="exerciseName"]') && !form.querySelector('input[name="reps"]');
+
+            if (isAddSetForm) {
+                // Reload to show the new row
+                location.reload();
+            } else {
+                // Save set form — start timer and update stats
+                startRestTimer();
+                loadSummary();
+            }
         })
         .catch(err => console.error('Form POST failed', err));
     });
