@@ -29,6 +29,22 @@
         .input[type=number]::-webkit-inner-spin-button,
         .input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
         .input[type=number] { -moz-appearance: textfield; }
+
+        /* notes textarea */
+        textarea.input {
+            resize: vertical;
+            min-height: 68px;
+            font-family: inherit;
+            line-height: 1.45;
+        }
+        .notes-status {
+            font-size: .75rem;
+            color: var(--text-dim);
+            margin-top: .3rem;
+            min-height: 1rem;
+            transition: color .2s;
+        }
+        .notes-status.saved { color: var(--green); }
     </style>
 </head>
 <body>
@@ -102,6 +118,15 @@
         <div class="empty__icon">🏋️</div>
         <p>No exercises loaded. This is an ad-hoc workout — sets will appear here as you add them via the API.</p>
     </div>
+
+    <!-- ===== NOTES CARD ===== -->
+    <div class="card" style="margin-top:1.5rem;">
+        <label style="font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:.4rem;">📝 Workout Notes</label>
+        <textarea id="notesTextarea" class="input" placeholder="How's the workout going? Anything to remember…" th:text="${session.notes}"></textarea>
+        <div class="notes-status" id="notesStatus">Type to save…</div>
+    </div>
+
+</div>
 
 </div>
 
@@ -325,6 +350,49 @@ document.querySelectorAll('form').forEach(form => {
         sessionStorage.removeItem('scrollY');
         requestAnimationFrame(() => window.scrollTo(0, Number(y)));
     }
+
+    /* ===============================
+   NOTES — debounced auto-save
+   =============================== */
+
+(function initNotes() {
+    const textarea  = document.getElementById('notesTextarea');
+    const statusEl  = document.getElementById('notesStatus');
+    if (!textarea) return;
+
+    let debounceTimer = null;
+
+    function saveNotes() {
+        statusEl.textContent = 'Saving…';
+        statusEl.className   = 'notes-status';
+
+        fetch(`/api/workout-sessions/${sessionId}/notes`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: textarea.value })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('save failed');
+            statusEl.textContent = '✓ Saved';
+            statusEl.className   = 'notes-status saved';
+        })
+        .catch(() => {
+            statusEl.textContent = '✗ Could not save';
+            statusEl.className   = 'notes-status';
+        });
+    }
+
+    textarea.addEventListener('input', () => {
+        statusEl.textContent = 'Type to save…';
+        statusEl.className   = 'notes-status';
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(saveNotes, 600);
+    });
+
+    textarea.addEventListener('blur', () => {
+        clearTimeout(debounceTimer);
+        saveNotes();
+    });
 })();
 /* ===============================
    START EVERYTHING
