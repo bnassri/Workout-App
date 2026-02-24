@@ -2,6 +2,7 @@ package com.example.workoutlogger.controller;
 
 import com.example.workoutlogger.domain.WorkoutTemplate;
 import com.example.workoutlogger.service.WorkoutTemplateService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,11 @@ public class WorkoutTemplatePageController {
 
     public WorkoutTemplatePageController(WorkoutTemplateService templateService) {
         this.templateService = templateService;
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("WorkoutTemplatePageController loaded successfully");
     }
 
     /**
@@ -48,6 +54,11 @@ public class WorkoutTemplatePageController {
             @RequestParam String name,
             @RequestParam(required = false) List<String> exerciseNames
     ) {
+        System.out.println("=== UPDATE TEMPLATE DEBUG ===");
+        System.out.println("ID: " + id);
+        System.out.println("Name: " + name);
+        System.out.println("Exercise names: " + exerciseNames);
+        System.out.println("============================");
         templateService.updateTemplate(id, name, exerciseNames);
         return "redirect:/templates";
     }
@@ -71,7 +82,7 @@ public class WorkoutTemplatePageController {
 
         return "edit-template"; // <-- template-edit.html
     }
-    @PostMapping("/templates/create")
+    @PostMapping("/create")
     public String createTemplate(
             @RequestParam String name
     ) {

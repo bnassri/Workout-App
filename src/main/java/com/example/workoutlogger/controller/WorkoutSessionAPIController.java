@@ -49,4 +49,16 @@ public class WorkoutSessionAPIController {
         workoutSessionService.endSession(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{id}/notes")
+    public ResponseEntity<Void> updateNotes(
+            @PathVariable UUID id,
+            @RequestBody java.util.Map<String, String> body
+    ) {
+        System.out.println("=== UPDATE NOTES CALLED ===");
+        System.out.println("ID: " + id);
+        System.out.println("Body: " + body);
+        workoutSessionService.updateNotes(id, body.getOrDefault("notes", ""));
+        return ResponseEntity.ok().build();
+    }
 }

@@ -285,5 +285,14 @@ public class WorkoutSessionService {
                 ));
     }
 
+    @Transactional
+    public WorkoutSession updateNotes(UUID sessionId, String notes) {
+        WorkoutSession session = repository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+        session.setNotes(notes);
+        return repository.save(session);
+    }
+
+
 
 }

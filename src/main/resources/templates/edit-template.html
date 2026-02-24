@@ -70,11 +70,12 @@
 <script th:inline="javascript">
 (function () {
     // Seed from server-rendered exercise list
-    var serverExercises = [[${template.exercises}]];
-    var exercises = [];
-    serverExercises.forEach(function (ex) {
-        exercises.push(ex.exerciseName);
-    });
+    var exercises = [
+        [# th:each="ex,iter : ${template.exercises}"]
+        [# th:if="${!iter.first}"],
+        [/]/*[[${ex.exerciseName}]]*/
+        [/]
+    ];
 
     var exerciseInput  = document.getElementById('exerciseInput');
     var addButton      = document.getElementById('addExercise');

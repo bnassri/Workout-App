@@ -13,6 +13,30 @@
         }
         .timer { animation: pulse-glow 2s ease-in-out infinite; }
 
+        /* floating rest timer - appears on right side */
+        #restTimer {
+            position: fixed;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surface);
+            border: 2px solid var(--accent);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 50;
+            font-size: 1.2rem;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            #restTimer {
+                right: 0.5rem;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
         /* sticky end-workout bar at bottom on mobile */
         .end-bar {
             position: fixed;
@@ -350,6 +374,7 @@ document.querySelectorAll('form').forEach(form => {
         sessionStorage.removeItem('scrollY');
         requestAnimationFrame(() => window.scrollTo(0, Number(y)));
     }
+    })();
 
     /* ===============================
    NOTES — debounced auto-save
