@@ -103,7 +103,12 @@
         </div>
     </div>
 
-    <!-- ========== Exercise breakdown ========== -->
+    <!-- ========== NOTES ========== -->
+    <div th:if="${summary.notes != null && !summary.notes.isBlank()}" class="card">
+        <h3 style="font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:.6rem;">📝 Notes</h3>
+        <p style="white-space: pre-wrap; line-height: 1.6; color: var(--text); margin: 0;" th:text="${summary.notes}">Notes go here</p>
+    </div>
+
     <!-- ========== Exercise breakdown ========== -->
     <div class="card">
         <h3 style="font-size:.82rem; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:.85rem;">Exercises</h3>
